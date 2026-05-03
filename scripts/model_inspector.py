@@ -12,6 +12,7 @@ from typing import Dict, List, Optional, Tuple
 
 import torch
 from safetensors import safe_open
+from tqdm import tqdm
 from transformers import AutoConfig, AutoModel
 
 
@@ -31,11 +32,19 @@ def format_size(numel: int, dtype: torch.dtype) -> str:
         if dtype.is_floating_point
         else torch.iinfo(dtype).bits // 8
     )
-    size_mb = (numel * element_size) / (1024 * 1024)
-    return f"{size_mb:.2f} MB" if size_mb < 1024 else f"{size_mb / 1024:.2f} GB"
+    size_kb = (numel * element_size) / 1024
+    if size_kb < 1:
+        return f"{size_kb * 1024:.2f} B"
+    if size_kb < 1024:
+        return f"{size_kb:.2f} KB"
+    size_mb = size_kb / 1024
+    if size_mb < 1024:
+        return f"{size_mb:.2f} MB"
+    return f"{size_mb / 1024:.2f} GB"
 
 
 def inspect_structure(model_path: str, out) -> None:
+    print("[2/3] 解析模型结构...", file=sys.stderr)
     config = AutoConfig.from_pretrained(model_path)
     with torch.device("meta"):
         model = AutoModel.from_config(config)
@@ -44,9 +53,11 @@ def inspect_structure(model_path: str, out) -> None:
     print(f"- **模型类**: `{type(model).__name__}`", file=out)
     print(f"- **参数总量**: {format_number(total_params)}\n", file=out)
     print("```\n" + str(model) + "\n```\n", file=out)
+    print("[2/3] 模型结构解析完成 ✓", file=sys.stderr)
 
 
 def inspect_config(model_path: str, out) -> None:
+    print("[1/3] 读取模型配置...", file=sys.stderr)
     config = AutoConfig.from_pretrained(model_path)
     print("# 模型配置\n", file=out)
     print(f"- **模型类型**: `{type(config).__name__}`", file=out)
@@ -62,9 +73,11 @@ def inspect_config(model_path: str, out) -> None:
     print("<details><summary>完整配置</summary>\n", file=out)
     print(f"```\n{config}\n```\n", file=out)
     print("</details>\n", file=out)
+    print("[1/3] 模型配置读取完成 ✓", file=sys.stderr)
 
 
 def inspect_weights(model_path: str, out) -> None:
+    print("[3/3] 扫描权重文件...", file=sys.stderr)
     # 查找权重文件
     safetensor_files = sorted(glob(os.path.join(model_path, "*.safetensors")))
     bin_files = sorted(glob(os.path.join(model_path, "*.bin")))
@@ -80,27 +93,62 @@ def inspect_weights(model_path: str, out) -> None:
     weight_files = safetensor_files if use_safetensors else bin_files
     file_type = "safetensors" if use_safetensors else "bin"
 
+    print(
+        f"[3/3] 找到 {len(weight_files)} 个 {file_type} 文件，开始读取...",
+        file=sys.stderr,
+    )
+
     # 扫描权重
     all_weights: List[Tuple[str, Tuple, int, torch.dtype, str]] = []
     total_params = 0
 
-    for filepath in weight_files:
+    file_pbar = tqdm(
+        weight_files,
+        desc="读取权重文件",
+        unit="file",
+        file=sys.stderr,
+    )
+    for filepath in file_pbar:
         fname = os.path.basename(filepath)
+        file_pbar.set_postfix_str(fname)
         if use_safetensors:
             with safe_open(filepath, "pt", "cpu") as f:
-                for name in f.keys():
+                keys = list(f.keys())
+                tensor_pbar = tqdm(
+                    keys,
+                    desc=f"  张量",
+                    unit="tensor",
+                    file=sys.stderr,
+                    leave=False,
+                )
+                for name in tensor_pbar:
                     tensor = f.get_tensor(name)
                     numel = tensor.numel()
                     all_weights.append((name, tensor.shape, numel, tensor.dtype, fname))
                     total_params += numel
+                    tensor_pbar.set_postfix_str(
+                        f"已扫描 {format_number(total_params)} 参数"
+                    )
+                tensor_pbar.close()
         else:
             checkpoint = torch.load(filepath, map_location="cpu", weights_only=True)
-            for name, tensor in checkpoint.items():
-                if not hasattr(tensor, "shape"):
-                    continue
+            items = [(n, t) for n, t in checkpoint.items() if hasattr(t, "shape")]
+            tensor_pbar = tqdm(
+                items,
+                desc=f"  张量",
+                unit="tensor",
+                file=sys.stderr,
+                leave=False,
+            )
+            for name, tensor in tensor_pbar:
                 numel = tensor.numel()
                 all_weights.append((name, tensor.shape, numel, tensor.dtype, fname))
                 total_params += numel
+                tensor_pbar.set_postfix_str(
+                    f"已扫描 {format_number(total_params)} 参数"
+                )
+            tensor_pbar.close()
+    file_pbar.close()
 
     all_weights.sort(key=lambda x: natural_sort_key(x[0]))
 
@@ -121,6 +169,7 @@ def inspect_weights(model_path: str, out) -> None:
             file=out,
         )
     print("\n</details>\n", file=out)
+    print("[3/3] 权重扫描完成 ✓", file=sys.stderr)
 
 
 def main():
