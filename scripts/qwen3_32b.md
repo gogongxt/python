@@ -101,12 +101,15 @@ Qwen3Config {
   "num_attention_heads": 64,
   "num_hidden_layers": 64,
   "num_key_value_heads": 8,
+  "pad_token_id": null,
   "rms_norm_eps": 1e-06,
-  "rope_scaling": null,
-  "rope_theta": 1000000,
+  "rope_parameters": {
+    "rope_theta": 1000000,
+    "rope_type": "default"
+  },
   "sliding_window": null,
   "tie_word_embeddings": false,
-  "transformers_version": "4.57.1",
+  "transformers_version": "5.7.0",
   "use_cache": true,
   "use_sliding_window": false,
   "vocab_size": 151936
@@ -155,7 +158,7 @@ Qwen3Model(
 - **权重张量数**: 707
 - **参数总量**: 32,762,123,264
 - **张量累计大小**: 61.02 GB
-- **压缩**: 707 → 14 行 (合并相同 shape/dtype 的 experts 和 layers)
+- **压缩**: 707 → 14 行
 
 <details><summary>详细权重列表</summary>
 
