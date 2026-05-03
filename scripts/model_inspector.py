@@ -4,6 +4,8 @@
 """
 
 import argparse
+import importlib
+import logging
 import os
 import re
 import sys
@@ -14,7 +16,7 @@ from typing import Dict, List, Optional, Tuple
 import torch
 from safetensors import safe_open
 from tqdm import tqdm
-from transformers import AutoConfig, AutoModel
+from transformers import AutoConfig, AutoModel, AutoModelForCausalLM
 
 
 def natural_sort_key(s: str) -> List:
@@ -25,6 +27,32 @@ def natural_sort_key(s: str) -> List:
 
 def format_number(num: int) -> str:
     return f"{num:,}"
+
+
+logger = logging.getLogger("model_inspector")
+
+_BOLD = "\033[1m"
+_YELLOW = "\033[33m"
+_RED = "\033[31m"
+_GREEN = "\033[32m"
+_RESET = "\033[0m"
+
+
+class _ColorFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:
+        msg = record.getMessage()
+        if record.levelno >= logging.ERROR:
+            return f"{_BOLD}{_RED}✗ {msg}{_RESET}"
+        if record.levelno >= logging.WARNING:
+            return f"{_BOLD}{_YELLOW}⚠ {msg}{_RESET}"
+        return f"{_GREEN}{msg}{_RESET}"
+
+
+def _setup_logging() -> None:
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setFormatter(_ColorFormatter())
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
 
 
 def _format_bytes(nbytes: int) -> str:
@@ -56,35 +84,84 @@ def format_size(numel: int, dtype) -> str:
     return f"{size_mb / 1024:.2f} GB"
 
 
-def inspect_structure(model_path: str, out) -> None:
-    print("[2/3] 解析模型结构...", file=sys.stderr)
-    config = AutoConfig.from_pretrained(model_path)
+def _try_instantiate_from_config(config):
+    """Try to instantiate a model from config, using Auto classes first,
+    then falling back to the architectures listed in config."""
     with torch.device("meta"):
-        model = AutoModel.from_config(config)
+        # 1. Try Auto classes
+        for auto_cls in (AutoModel, AutoModelForCausalLM):
+            try:
+                return auto_cls.from_config(config)
+            except ValueError:
+                continue
+
+        # 2. Try architectures from config
+        architectures = getattr(config, "architectures", None) or []
+        config_module = type(config).__module__
+        for arch_name in architectures:
+            try:
+                mod = importlib.import_module(config_module.rsplit(".", 1)[0])
+                cls = getattr(mod, arch_name, None)
+                if cls is None:
+                    continue
+                from_config_fn = getattr(cls, "from_config", None) or getattr(
+                    cls, "_from_config", None
+                )
+                if from_config_fn is not None:
+                    return from_config_fn(config)
+            except Exception:
+                continue
+
+    return None
+
+
+def inspect_structure(model_path: str, out) -> None:
+    logger.info("[2/3] 解析模型结构...")
+    config = AutoConfig.from_pretrained(model_path)
+    model = _try_instantiate_from_config(config)
     print("# 模型结构\n", file=out)
-    print(f"**模型类**: `{type(model).__name__}`\n", file=out)
-    print("```\n" + str(model) + "\n```\n", file=out)
-    print("[2/3] 模型结构解析完成 ✓", file=sys.stderr)
+    if model is not None:
+        print(f"**模型类**: `{type(model).__name__}`\n", file=out)
+        print("```\n" + str(model) + "\n```\n", file=out)
+        logger.info("[2/3] 模型结构解析完成 ✓")
+    else:
+        print(
+            f"**模型类**: `{type(config).__name__}` (当前 transformers 版本不支持实例化)\n",
+            file=out,
+        )
+        logger.warning("[2/3] 模型结构解析完成 (无法实例化模型结构，仅输出配置信息)")
 
 
 def inspect_config(model_path: str, out) -> None:
-    print("[1/3] 读取模型配置...", file=sys.stderr)
+    logger.info("[1/3] 读取模型配置...")
     config = AutoConfig.from_pretrained(model_path)
     print("# 模型配置\n", file=out)
     print(f"- **模型类型**: `{type(config).__name__}`", file=out)
     print(f"- **数据类型**: `{getattr(config, 'dtype', 'float16')}`", file=out)
-    print(f"- **隐藏层大小**: {getattr(config, 'hidden_size', 'N/A')}", file=out)
-    print(f"- **层数**: {getattr(config, 'num_hidden_layers', 'N/A')}", file=out)
-    print(
-        f"- **注意力头数**: {getattr(config, 'num_attention_heads', 'N/A')}", file=out
-    )
-    print(f"- **词表大小**: {getattr(config, 'vocab_size', 'N/A')}", file=out)
-    print(f"- **中间层大小**: {getattr(config, 'intermediate_size', 'N/A')}", file=out)
+    missing_fields = []
+    for label, attr in [
+        ("隐藏层大小", "hidden_size"),
+        ("层数", "num_hidden_layers"),
+        ("注意力头数", "num_attention_heads"),
+        ("词表大小", "vocab_size"),
+        ("中间层大小", "intermediate_size"),
+    ]:
+        val = getattr(config, attr, None)
+        if val is not None:
+            print(f"- **{label}**: {val}", file=out)
+        else:
+            print(f"- **{label}**: N/A", file=out)
+            missing_fields.append(attr)
     print(file=out)
     print("<details><summary>完整配置</summary>\n", file=out)
     print(f"```\n{config}\n```\n", file=out)
     print("</details>\n", file=out)
-    print("[1/3] 模型配置读取完成 ✓", file=sys.stderr)
+    if missing_fields:
+        logger.warning(
+            "[1/3] 模型配置读取完成 (部分字段缺失: %s)", ", ".join(missing_fields)
+        )
+    else:
+        logger.info("[1/3] 模型配置读取完成 ✓")
 
 
 # Patterns for grouping: (compiled regex, template for merged name)
@@ -234,12 +311,15 @@ def _read_bin_file(
 def inspect_weights(
     model_path: str, out, compress: bool = True, num_workers: int = 16
 ) -> None:
-    print("[3/3] 扫描权重文件...", file=sys.stderr)
+    logger.info("[3/3] 扫描权重文件...")
     # 查找权重文件
     safetensor_files = sorted(glob(os.path.join(model_path, "*.safetensors")))
     bin_files = sorted(glob(os.path.join(model_path, "*.bin")))
 
     if not safetensor_files and not bin_files:
+        logger.error(
+            "[3/3] 在 `%s` 中未找到权重文件 (.safetensors 或 .bin)", model_path
+        )
         print(
             f"**错误**: 在 `{model_path}` 中未找到权重文件 (.safetensors 或 .bin)",
             file=out,
@@ -252,10 +332,11 @@ def inspect_weights(
     read_fn = _read_safetensor_file if use_safetensors else _read_bin_file
 
     actual_workers = min(num_workers, len(weight_files))
-    print(
-        f"[3/3] 找到 {len(weight_files)} 个 {file_type} 文件，"
-        f"使用 {actual_workers} 进程并发读取...",
-        file=sys.stderr,
+    logger.info(
+        "[3/3] 找到 %d 个 %s 文件，使用 %d 进程并发读取...",
+        len(weight_files),
+        file_type,
+        actual_workers,
     )
 
     # 多进程并发读取权重文件
@@ -273,9 +354,8 @@ def inspect_weights(
             try:
                 results = future.result()
             except Exception as e:
-                print(f"读取 {fname} 失败: {e}", file=sys.stderr)
+                logger.warning("读取 %s 失败: %s", fname, e)
                 pbar.update(1)
-                continue
             all_weights.extend(results)
             total_params += sum(r[2] for r in results)
             pbar.update(1)
@@ -341,7 +421,7 @@ def inspect_weights(
             file=out,
         )
     print("\n</details>\n", file=out)
-    print("[3/3] 权重扫描完成 ✓", file=sys.stderr)
+    logger.info("[3/3] 权重扫描完成 ✓")
 
 
 def main():
@@ -363,8 +443,10 @@ def main():
     )
     args = parser.parse_args()
 
+    _setup_logging()
+
     if os.path.exists(args.model_path) and not os.path.isdir(args.model_path):
-        print(f"错误：'{args.model_path}' 不是有效的目录", file=sys.stderr)
+        logger.error("'%s' 不是有效的目录", args.model_path)
         sys.exit(1)
 
     from io import StringIO
