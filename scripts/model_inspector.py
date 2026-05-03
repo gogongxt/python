@@ -10,8 +10,9 @@ import re
 import sys
 from contextlib import contextmanager
 from glob import glob
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+import torch
 from safetensors import safe_open
 from tabulate import tabulate
 from tqdm import tqdm
@@ -67,21 +68,39 @@ def format_number(num: int) -> str:
     return f"{num:,}"
 
 
-def format_size(shape: Tuple[int, ...], dtype: str = "float16") -> str:
+def format_size(
+    shape: Tuple[int, ...], dtype: Union[torch.dtype, str] = torch.float16
+) -> str:
     """
     计算并格式化参数大小
+
+    Args:
+        shape: 张量的形状
+        dtype: torch.dtype 对象 (如 torch.float16, torch.int32) 或字符串（向后兼容）
     """
-    # 支持更多数据类型
-    if dtype == "float32":
-        element_size = 4
-    elif dtype in ["float16", "bfloat16", "fp16", "bf16"]:
-        element_size = 2
-    elif dtype == "int8":
-        element_size = 1
-    elif dtype == "int4":
-        element_size = 0.5
+    # 如果是字符串，转换为 torch.dtype（向后兼容）
+    if isinstance(dtype, str):
+        dtype_str = dtype.replace("torch.", "")
+        dtype_map = {
+            "float32": torch.float32,
+            "float16": torch.float16,
+            "bfloat16": torch.bfloat16,
+            "fp16": torch.float16,
+            "bf16": torch.bfloat16,
+            "int8": torch.int8,
+            "int32": torch.int32,
+            "int64": torch.int64,
+            "int4": torch.int8,  # int4 实际存储为 int8
+        }
+        dtype = dtype_map.get(dtype_str, torch.float16)
+    # 使用 PyTorch 的类型系统获取字节数
+    if dtype.is_floating_point:
+        element_size = torch.finfo(dtype).bits // 8
     else:
-        element_size = 2  # 默认假设为16位
+        element_size = torch.iinfo(dtype).bits // 8
+    # 特殊处理 int4（通常以 int8 存储）
+    if "int4" in str(dtype):
+        element_size = 0.5
     total_elements = 1
     for dim in shape:
         total_elements *= dim
@@ -146,15 +165,6 @@ def print_model_structure(model_path: str) -> bool:
             f"冻结参数:     {format_number(frozen_params)} ({frozen_params/total_params*100:.1f}%)"
         )
 
-        # 根据配置中的dtype计算实际大小
-        element_size = (
-            4
-            if model_dtype == "float32"
-            else 2 if model_dtype in ["float16", "bfloat16"] else 1
-        )
-        model_size_gb = total_params * element_size / (1024**3)
-        print(f"实际大小({model_dtype}): {model_size_gb:.2f} GB")
-
         return True, model, model_dtype
     except Exception as e:
         print(f"❌ 加载模型失败: {e}")
@@ -197,20 +207,18 @@ def print_model_weights(model_path: str) -> bool:
                     for weight_name in f.keys():
                         tensor = f.get_tensor(weight_name)
                         shape = tensor.shape
-                        dtype = str(tensor.dtype)
+                        dtype = tensor.dtype  # 直接使用 torch.dtype 对象
                         size = tensor.numel()
                         all_weights.append(
                             (weight_name, shape, size, dtype, os.path.basename(file))
                         )
                         total_size += size
             else:  # bin files
-                import torch
-
                 checkpoint = torch.load(file, map_location="cpu")
                 for weight_name, tensor in checkpoint.items():
                     if hasattr(tensor, "shape"):
                         shape = tensor.shape
-                        dtype = str(tensor.dtype)
+                        dtype = tensor.dtype  # 直接使用 torch.dtype 对象
                         size = tensor.numel()
                         all_weights.append(
                             (weight_name, shape, size, dtype, os.path.basename(file))
@@ -231,7 +239,6 @@ def print_model_weights(model_path: str) -> bool:
     print("-" * 40)
     print(f"权重总数:     {len(all_weights)}")
     print(f"参数总数:     {format_number(total_size)}")
-    print(f"模型总大小:   {format_size((total_size,))}")
 
     # 按层分析
     layer_stats = {}
@@ -256,7 +263,13 @@ def print_model_weights(model_path: str) -> bool:
     table_data = []
     for weight_name, shape, size, dtype, file_name in all_weights:
         table_data.append(
-            [weight_name, str(shape), dtype, format_size((size,), dtype), file_name]
+            [
+                weight_name,
+                str(shape),
+                str(dtype),
+                format_size((size,), dtype),
+                file_name,
+            ]
         )
 
     # 使用 tabulate 打印表格
