@@ -164,120 +164,92 @@ def inspect_config(model_path: str, out) -> None:
         logger.info("[1/3] 模型配置读取完成 ✓")
 
 
-# Patterns for grouping: (compiled regex, template for merged name)
-_EXPERT_RE = re.compile(r"^(.+experts\.)(\d+)(\..+)$")
-_LAYER_RE = re.compile(r"^(.+layers\.)(\d+)(\..+)$")
+def _find_numeric_segments(name: str) -> List[int]:
+    """Return indices of purely-numeric segments in a dot-separated name."""
+    return [i for i, seg in enumerate(name.split(".")) if seg.isdigit()]
 
 
 def _compress_weights(
     all_weights: List[Tuple[str, Tuple, int, str, str]],
 ) -> List[Tuple[str, Tuple, int, str, str, str]]:
-    """Compress weight list by merging identical experts and layers.
+    """Compress weight list by merging identical numeric-indexed segments.
+
+    For each dot-separated name, finds segments that are pure digits (e.g.
+    ``blocks.24`` → 24 is numeric).  Merges from rightmost numeric position
+    inward so that inner groups (e.g. experts) are collapsed before outer
+    groups (e.g. layers/blocks).
 
     Returns list of (display_name, shape, numel, dtype, fname, note).
     """
-    # First pass: group experts within each layer
-    # Key: (prefix, suffix) -> list of (expert_idx, weight_info)
-    expert_groups: Dict[Tuple[str, str], List[Tuple[int, Tuple, int, str, str]]] = {}
-    non_expert: List[Tuple[str, Tuple, int, str, str]] = []
+    items: List[Tuple[str, Tuple, int, str, str, str]] = [
+        (name, shape, numel, dtype, fname, "")
+        for name, shape, numel, dtype, fname in all_weights
+    ]
 
-    for name, shape, numel, dtype, fname in all_weights:
-        m = _EXPERT_RE.match(name)
-        if m:
-            prefix, idx_str, suffix = m.group(1), m.group(2), m.group(3)
-            expert_groups.setdefault((prefix, suffix), []).append(
-                (int(idx_str), shape, numel, dtype, fname)
-            )
-        else:
-            non_expert.append((name, shape, numel, dtype, fname))
+    # Collect all numeric segment positions across all names
+    seg_positions: set = set()
+    for name, *_ in items:
+        seg_positions.update(_find_numeric_segments(name))
 
-    # Merge expert groups where all experts share same shape+dtype
-    merged_experts: List[Tuple[str, Tuple, int, str, str, str]] = []
-    for (prefix, suffix), items in expert_groups.items():
-        items.sort(key=lambda x: x[0])
-        # Check if all share same shape and dtype
-        first_shape, first_dtype = items[0][1], items[0][3]
-        if all(s == first_shape and d == first_dtype for _, s, _, d, _ in items):
-            indices = [x[0] for x in items]
-            range_str = (
-                str(indices[0]) if len(indices) == 1 else f"{indices[0]}-{indices[-1]}"
-            )
-            merged_name = f"{prefix}{range_str}{suffix}"
-            single_numel = items[0][2]
-            total_numel = single_numel * len(indices)
-            note = f"×{len(indices)} experts"
-            # Use fname from first item
-            fnames = {x[4] for x in items}
-            fname = "Multi Files" if len(fnames) > 1 else items[0][4]
-            merged_experts.append(
-                (merged_name, first_shape, total_numel, first_dtype, fname, note)
-            )
-        else:
-            # Not uniform — emit each individually
-            for idx, shape, numel, dtype, fname in items:
-                orig_name = f"{prefix}{idx}{suffix}"
-                merged_experts.append((orig_name, shape, numel, dtype, fname, ""))
+    # Process from rightmost position inward (inner groups first)
+    for pos in sorted(seg_positions, reverse=True):
+        groups: Dict[Tuple[str, str], List[Tuple[int, Tuple, int, str, str, str]]] = {}
+        ungrouped: List[Tuple[str, Tuple, int, str, str, str]] = []
 
-    # Combine with non-expert weights and sort by original name logic
-    combined: List[Tuple[str, Tuple, int, str, str, str]] = []
-    for name, shape, numel, dtype, fname in non_expert:
-        combined.append((name, shape, numel, dtype, fname, ""))
-    combined.extend(merged_experts)
-    combined.sort(key=lambda x: natural_sort_key(x[0]))
-
-    # Second pass: group layers
-    layer_groups: Dict[Tuple[str, str], List[Tuple[int, Tuple, int, str, str, str]]] = (
-        {}
-    )
-    non_layer: List[Tuple[str, Tuple, int, str, str, str]] = []
-
-    for item in combined:
-        name = item[0]
-        m = _LAYER_RE.match(name)
-        if m:
-            prefix, idx_str, suffix = m.group(1), m.group(2), m.group(3)
-            layer_groups.setdefault((prefix, suffix), []).append(
-                (int(idx_str), *item[1:])
-            )
-        else:
-            non_layer.append(item)
-
-    result: List[Tuple[str, Tuple, int, str, str, str]] = []
-    for (prefix, suffix), items in layer_groups.items():
-        items.sort(key=lambda x: x[0])
-        # Check uniformity: shape, dtype, and note must match
-        first_shape, first_dtype, first_note = items[0][1], items[0][3], items[0][5]
-        uniform = all(
-            s == first_shape and d == first_dtype and n == first_note
-            for _, s, _, d, _, n in items
-        )
-        if uniform:
-            indices = [x[0] for x in items]
-            range_str = (
-                str(indices[0]) if len(indices) == 1 else f"{indices[0]}-{indices[-1]}"
-            )
-            merged_name = f"{prefix}{range_str}{suffix}"
-            single_numel = items[0][2]
-            total_numel = single_numel * len(indices)
-            layer_note = f"×{len(indices)} layers"
-            if first_note:
-                note = f"{layer_note}, {first_note}"
+        for item in items:
+            name = item[0]
+            segs = name.split(".")
+            if pos < len(segs) and segs[pos].isdigit():
+                prefix = ".".join(segs[:pos]) + "." if pos > 0 else ""
+                suffix = "." + ".".join(segs[pos + 1 :]) if pos + 1 < len(segs) else ""
+                groups.setdefault((prefix, suffix), []).append(
+                    (int(segs[pos]), *item[1:])
+                )
             else:
-                note = layer_note
-            fnames = {x[4] for x in items}
-            fname = "Multi Files" if len(fnames) > 1 else items[0][4]
-            result.append(
-                (merged_name, first_shape, total_numel, first_dtype, fname, note)
-            )
-        else:
-            for idx, shape, numel, dtype, fname, note in items:
-                orig_name = f"{prefix}{idx}{suffix}"
-                result.append((orig_name, shape, numel, dtype, fname, note))
+                ungrouped.append(item)
 
-    # Re-add non-layer items
-    result.extend(non_layer)
-    result.sort(key=lambda x: natural_sort_key(x[0]))
-    return result
+        merged: List[Tuple[str, Tuple, int, str, str, str]] = []
+        for (prefix, suffix), entries in groups.items():
+            entries.sort(key=lambda x: x[0])
+            first_shape, first_dtype, first_note = (
+                entries[0][1],
+                entries[0][3],
+                entries[0][5],
+            )
+            uniform = all(
+                s == first_shape and d == first_dtype and n == first_note
+                for _, s, _, d, _, n in entries
+            )
+            if uniform:
+                indices = [x[0] for x in entries]
+                range_str = (
+                    str(indices[0])
+                    if len(indices) == 1
+                    else f"{indices[0]}-{indices[-1]}"
+                )
+                merged_name = f"{prefix}{range_str}{suffix}"
+                single_numel = entries[0][2]
+                total_numel = single_numel * len(indices)
+                # Derive label from the segment name before the numeric index
+                segs = merged_name.split(".")
+                label = segs[pos - 1] if pos > 0 else "items"
+                note = f"×{len(indices)} {label}"
+                if first_note:
+                    note = f"{note}, {first_note}"
+                fnames = {x[4] for x in entries}
+                fname = "Multi Files" if len(fnames) > 1 else entries[0][4]
+                merged.append(
+                    (merged_name, first_shape, total_numel, first_dtype, fname, note)
+                )
+            else:
+                for idx, shape, numel, dtype, fname, note in entries:
+                    orig_name = f"{prefix}{idx}{suffix}"
+                    merged.append((orig_name, shape, numel, dtype, fname, note))
+
+        items = ungrouped + merged
+        items.sort(key=lambda x: natural_sort_key(x[0]))
+
+    return items
 
 
 def _read_safetensor_file(
@@ -396,7 +368,7 @@ def inspect_weights(
     if compress:
         compressed = _compress_weights(all_weights)
         print(
-            f"- **压缩**: {raw_count} → {len(compressed)} 行 (合并相同 shape/dtype 的 experts 和 layers)",
+            f"- **压缩**: {raw_count} → {len(compressed)} 行",
             file=out,
         )
         display_weights = compressed

@@ -831,7 +831,7 @@ Qwen3OmniMoeForConditionalGeneration(
 - **权重张量数**: 28,010
 - **参数总量**: 35,259,818,545
 - **张量累计大小**: 65.68 GB
-- **压缩**: 28010 → 617 行 (合并相同 shape/dtype 的 experts 和 layers)
+- **压缩**: 28010 → 201 行
 
 <details><summary>详细权重列表</summary>
 
@@ -840,120 +840,56 @@ Qwen3OmniMoeForConditionalGeneration(
 | `code2wav.code_embedding.weight` | `[32768, 1024]` | `torch.bfloat16` | 64.00 MB | model-00015-of-00015.safetensors |
 | `code2wav.decoder.0.conv.bias` | `[1536]` | `torch.bfloat16` | 3.00 KB | model-00015-of-00015.safetensors |
 | `code2wav.decoder.0.conv.weight` | `[1536, 1024, 7]` | `torch.bfloat16` | 21.00 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.0.alpha` | `[1536]` | `torch.bfloat16` | 3.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.0.beta` | `[1536]` | `torch.bfloat16` | 3.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.1.conv.bias` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.1.conv.weight` | `[1536, 768, 16]` | `torch.bfloat16` | 36.00 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.2.act1.alpha` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.2.act1.beta` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.2.act2.alpha` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.2.act2.beta` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.2.conv1.conv.bias` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.2.conv1.conv.weight` | `[768, 768, 7]` | `torch.bfloat16` | 7.88 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.2.conv2.conv.bias` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.2.conv2.conv.weight` | `[768, 768, 1]` | `torch.bfloat16` | 1.12 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.3.act1.alpha` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.3.act1.beta` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.3.act2.alpha` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.3.act2.beta` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.3.conv1.conv.bias` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.3.conv1.conv.weight` | `[768, 768, 7]` | `torch.bfloat16` | 7.88 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.3.conv2.conv.bias` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.3.conv2.conv.weight` | `[768, 768, 1]` | `torch.bfloat16` | 1.12 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.4.act1.alpha` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.4.act1.beta` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.4.act2.alpha` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.4.act2.beta` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.4.conv1.conv.bias` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.4.conv1.conv.weight` | `[768, 768, 7]` | `torch.bfloat16` | 7.88 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.4.conv2.conv.bias` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.1.block.4.conv2.conv.weight` | `[768, 768, 1]` | `torch.bfloat16` | 1.12 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.0.alpha` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.0.beta` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.1.conv.bias` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.1.conv.weight` | `[768, 384, 10]` | `torch.bfloat16` | 5.62 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.2.act1.alpha` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.2.act1.beta` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.2.act2.alpha` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.2.act2.beta` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.2.conv1.conv.bias` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.2.conv1.conv.weight` | `[384, 384, 7]` | `torch.bfloat16` | 1.97 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.2.conv2.conv.bias` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.2.conv2.conv.weight` | `[384, 384, 1]` | `torch.bfloat16` | 288.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.3.act1.alpha` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.3.act1.beta` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.3.act2.alpha` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.3.act2.beta` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.3.conv1.conv.bias` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.3.conv1.conv.weight` | `[384, 384, 7]` | `torch.bfloat16` | 1.97 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.3.conv2.conv.bias` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.3.conv2.conv.weight` | `[384, 384, 1]` | `torch.bfloat16` | 288.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.4.act1.alpha` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.4.act1.beta` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.4.act2.alpha` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.4.act2.beta` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.4.conv1.conv.bias` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.4.conv1.conv.weight` | `[384, 384, 7]` | `torch.bfloat16` | 1.97 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.4.conv2.conv.bias` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.2.block.4.conv2.conv.weight` | `[384, 384, 1]` | `torch.bfloat16` | 288.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.0.alpha` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.0.beta` | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.1.conv.bias` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.1.conv.weight` | `[384, 192, 8]` | `torch.bfloat16` | 1.12 MB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.2.act1.alpha` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.2.act1.beta` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.2.act2.alpha` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.2.act2.beta` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.2.conv1.conv.bias` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.2.conv1.conv.weight` | `[192, 192, 7]` | `torch.bfloat16` | 504.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.2.conv2.conv.bias` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.2.conv2.conv.weight` | `[192, 192, 1]` | `torch.bfloat16` | 72.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.3.act1.alpha` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.3.act1.beta` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.3.act2.alpha` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.3.act2.beta` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.3.conv1.conv.bias` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.3.conv1.conv.weight` | `[192, 192, 7]` | `torch.bfloat16` | 504.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.3.conv2.conv.bias` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.3.conv2.conv.weight` | `[192, 192, 1]` | `torch.bfloat16` | 72.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.4.act1.alpha` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.4.act1.beta` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.4.act2.alpha` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.4.act2.beta` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.4.conv1.conv.bias` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.4.conv1.conv.weight` | `[192, 192, 7]` | `torch.bfloat16` | 504.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.4.conv2.conv.bias` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.3.block.4.conv2.conv.weight` | `[192, 192, 1]` | `torch.bfloat16` | 72.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.0.alpha` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.0.beta` | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.1.conv.bias` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.1.conv.weight` | `[192, 96, 6]` | `torch.bfloat16` | 216.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.2.act1.alpha` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.2.act1.beta` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.2.act2.alpha` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.2.act2.beta` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.2.conv1.conv.bias` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.2.conv1.conv.weight` | `[96, 96, 7]` | `torch.bfloat16` | 126.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.2.conv2.conv.bias` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.2.conv2.conv.weight` | `[96, 96, 1]` | `torch.bfloat16` | 18.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.3.act1.alpha` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.3.act1.beta` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.3.act2.alpha` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.3.act2.beta` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.3.conv1.conv.bias` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.3.conv1.conv.weight` | `[96, 96, 7]` | `torch.bfloat16` | 126.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.3.conv2.conv.bias` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.3.conv2.conv.weight` | `[96, 96, 1]` | `torch.bfloat16` | 18.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.4.act1.alpha` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.4.act1.beta` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.4.act2.alpha` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.4.act2.beta` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.4.conv1.conv.bias` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.4.conv1.conv.weight` | `[96, 96, 7]` | `torch.bfloat16` | 126.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.4.conv2.conv.bias` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.4.block.4.conv2.conv.weight` | `[96, 96, 1]` | `torch.bfloat16` | 18.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.decoder.5.alpha` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
-| `code2wav.decoder.5.beta` | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.0.alpha` (×1 block) | `[1536]` | `torch.bfloat16` | 3.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.0.beta` (×1 block) | `[1536]` | `torch.bfloat16` | 3.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.1.conv.bias` (×1 block) | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.1.conv.weight` (×1 block) | `[1536, 768, 16]` | `torch.bfloat16` | 36.00 MB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.2-4.act1.alpha` (×3 block) | `[768]` | `torch.bfloat16` | 4.50 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.2-4.act1.beta` (×3 block) | `[768]` | `torch.bfloat16` | 4.50 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.2-4.act2.alpha` (×3 block) | `[768]` | `torch.bfloat16` | 4.50 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.2-4.act2.beta` (×3 block) | `[768]` | `torch.bfloat16` | 4.50 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.2-4.conv1.conv.bias` (×3 block) | `[768]` | `torch.bfloat16` | 4.50 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.2-4.conv1.conv.weight` (×3 block) | `[768, 768, 7]` | `torch.bfloat16` | 23.62 MB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.2-4.conv2.conv.bias` (×3 block) | `[768]` | `torch.bfloat16` | 4.50 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.1.block.2-4.conv2.conv.weight` (×3 block) | `[768, 768, 1]` | `torch.bfloat16` | 3.38 MB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.0.alpha` (×1 block) | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.0.beta` (×1 block) | `[768]` | `torch.bfloat16` | 1.50 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.1.conv.bias` (×1 block) | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.1.conv.weight` (×1 block) | `[768, 384, 10]` | `torch.bfloat16` | 5.62 MB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.2-4.act1.alpha` (×3 block) | `[384]` | `torch.bfloat16` | 2.25 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.2-4.act1.beta` (×3 block) | `[384]` | `torch.bfloat16` | 2.25 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.2-4.act2.alpha` (×3 block) | `[384]` | `torch.bfloat16` | 2.25 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.2-4.act2.beta` (×3 block) | `[384]` | `torch.bfloat16` | 2.25 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.2-4.conv1.conv.bias` (×3 block) | `[384]` | `torch.bfloat16` | 2.25 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.2-4.conv1.conv.weight` (×3 block) | `[384, 384, 7]` | `torch.bfloat16` | 5.91 MB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.2-4.conv2.conv.bias` (×3 block) | `[384]` | `torch.bfloat16` | 2.25 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.2.block.2-4.conv2.conv.weight` (×3 block) | `[384, 384, 1]` | `torch.bfloat16` | 864.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.0.alpha` (×1 block) | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.0.beta` (×1 block) | `[384]` | `torch.bfloat16` | 768.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.1.conv.bias` (×1 block) | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.1.conv.weight` (×1 block) | `[384, 192, 8]` | `torch.bfloat16` | 1.12 MB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.2-4.act1.alpha` (×3 block) | `[192]` | `torch.bfloat16` | 1.12 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.2-4.act1.beta` (×3 block) | `[192]` | `torch.bfloat16` | 1.12 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.2-4.act2.alpha` (×3 block) | `[192]` | `torch.bfloat16` | 1.12 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.2-4.act2.beta` (×3 block) | `[192]` | `torch.bfloat16` | 1.12 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.2-4.conv1.conv.bias` (×3 block) | `[192]` | `torch.bfloat16` | 1.12 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.2-4.conv1.conv.weight` (×3 block) | `[192, 192, 7]` | `torch.bfloat16` | 1.48 MB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.2-4.conv2.conv.bias` (×3 block) | `[192]` | `torch.bfloat16` | 1.12 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.3.block.2-4.conv2.conv.weight` (×3 block) | `[192, 192, 1]` | `torch.bfloat16` | 216.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.0.alpha` (×1 block) | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.0.beta` (×1 block) | `[192]` | `torch.bfloat16` | 384.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.1.conv.bias` (×1 block) | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.1.conv.weight` (×1 block) | `[192, 96, 6]` | `torch.bfloat16` | 216.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.2-4.act1.alpha` (×3 block) | `[96]` | `torch.bfloat16` | 576.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.2-4.act1.beta` (×3 block) | `[96]` | `torch.bfloat16` | 576.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.2-4.act2.alpha` (×3 block) | `[96]` | `torch.bfloat16` | 576.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.2-4.act2.beta` (×3 block) | `[96]` | `torch.bfloat16` | 576.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.2-4.conv1.conv.bias` (×3 block) | `[96]` | `torch.bfloat16` | 576.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.2-4.conv1.conv.weight` (×3 block) | `[96, 96, 7]` | `torch.bfloat16` | 378.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.2-4.conv2.conv.bias` (×3 block) | `[96]` | `torch.bfloat16` | 576.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.4.block.2-4.conv2.conv.weight` (×3 block) | `[96, 96, 1]` | `torch.bfloat16` | 54.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.decoder.5.alpha` (×1 decoder) | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
+| `code2wav.decoder.5.beta` (×1 decoder) | `[96]` | `torch.bfloat16` | 192.00 B | model-00015-of-00015.safetensors |
 | `code2wav.decoder.6.conv.bias` | `[1]` | `torch.bfloat16` | 2.00 B | model-00015-of-00015.safetensors |
 | `code2wav.decoder.6.conv.weight` | `[1, 96, 7]` | `torch.bfloat16` | 1.31 KB | model-00015-of-00015.safetensors |
 | `code2wav.pre_transformer.layers.0-7.input_layernorm.weight` (×8 layers) | `[1024]` | `torch.bfloat16` | 16.00 KB | model-00015-of-00015.safetensors |
@@ -968,58 +904,30 @@ Qwen3OmniMoeForConditionalGeneration(
 | `code2wav.pre_transformer.layers.0-7.self_attn.v_proj.weight` (×8 layers) | `[1024, 1024]` | `torch.bfloat16` | 16.00 MB | model-00015-of-00015.safetensors |
 | `code2wav.pre_transformer.layers.0-7.self_attn_layer_scale.scale` (×8 layers) | `[1024]` | `torch.bfloat16` | 16.00 KB | model-00015-of-00015.safetensors |
 | `code2wav.pre_transformer.norm.weight` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.0.conv.bias` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.0.conv.weight` | `[1024, 1024, 2]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.1.dwconv.conv.bias` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.1.dwconv.conv.weight` | `[1024, 1, 7]` | `torch.bfloat16` | 14.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.1.gamma` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.1.norm.bias` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.1.norm.weight` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.1.pwconv1.bias` | `[4096]` | `torch.bfloat16` | 8.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.1.pwconv1.weight` | `[4096, 1024]` | `torch.bfloat16` | 8.00 MB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.1.pwconv2.bias` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.0.1.pwconv2.weight` | `[1024, 4096]` | `torch.bfloat16` | 8.00 MB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.0.conv.bias` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.0.conv.weight` | `[1024, 1024, 2]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.1.dwconv.conv.bias` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.1.dwconv.conv.weight` | `[1024, 1, 7]` | `torch.bfloat16` | 14.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.1.gamma` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.1.norm.bias` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.1.norm.weight` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.1.pwconv1.bias` | `[4096]` | `torch.bfloat16` | 8.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.1.pwconv1.weight` | `[4096, 1024]` | `torch.bfloat16` | 8.00 MB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.1.pwconv2.bias` | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
-| `code2wav.upsample.1.1.pwconv2.weight` | `[1024, 4096]` | `torch.bfloat16` | 8.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.0.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.1.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.2.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.3.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.4.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.5.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.6.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.7.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.8.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.9.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.10.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.11.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.12.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.13.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.lm_head.14.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.0.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00014-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.1.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.2.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.3.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.4.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.5.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.6.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.7.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.8.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.9.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.10.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.11.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.12.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.13.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
-| `talker.code_predictor.model.codec_embedding.14.weight` | `[2048, 1024]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.0.conv.bias` (×1 0) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.0.conv.weight` (×1 0) | `[1024, 1024, 2]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.1.dwconv.conv.bias` (×1 0) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.1.dwconv.conv.weight` (×1 0) | `[1024, 1, 7]` | `torch.bfloat16` | 14.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.1.gamma` (×1 0) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.1.norm.bias` (×1 0) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.1.norm.weight` (×1 0) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.1.pwconv1.bias` (×1 0) | `[4096]` | `torch.bfloat16` | 8.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.1.pwconv1.weight` (×1 0) | `[4096, 1024]` | `torch.bfloat16` | 8.00 MB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.1.pwconv2.bias` (×1 0) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.0.1.pwconv2.weight` (×1 0) | `[1024, 4096]` | `torch.bfloat16` | 8.00 MB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.0.conv.bias` (×1 1) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.0.conv.weight` (×1 1) | `[1024, 1024, 2]` | `torch.bfloat16` | 4.00 MB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.1.dwconv.conv.bias` (×1 1) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.1.dwconv.conv.weight` (×1 1) | `[1024, 1, 7]` | `torch.bfloat16` | 14.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.1.gamma` (×1 1) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.1.norm.bias` (×1 1) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.1.norm.weight` (×1 1) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.1.pwconv1.bias` (×1 1) | `[4096]` | `torch.bfloat16` | 8.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.1.pwconv1.weight` (×1 1) | `[4096, 1024]` | `torch.bfloat16` | 8.00 MB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.1.pwconv2.bias` (×1 1) | `[1024]` | `torch.bfloat16` | 2.00 KB | model-00015-of-00015.safetensors |
+| `code2wav.upsample.1.1.pwconv2.weight` (×1 1) | `[1024, 4096]` | `torch.bfloat16` | 8.00 MB | model-00015-of-00015.safetensors |
+| `talker.code_predictor.lm_head.0-14.weight` (×15 lm_head) | `[2048, 1024]` | `torch.bfloat16` | 60.00 MB | model-00015-of-00015.safetensors |
+| `talker.code_predictor.model.codec_embedding.0-14.weight` (×15 codec_embedding) | `[2048, 1024]` | `torch.bfloat16` | 60.00 MB | Multi Files |
 | `talker.code_predictor.model.layers.0-4.input_layernorm.weight` (×5 layers) | `[1024]` | `torch.bfloat16` | 10.00 KB | model-00014-of-00015.safetensors |
 | `talker.code_predictor.model.layers.0-4.mlp.down_proj.weight` (×5 layers) | `[1024, 3072]` | `torch.bfloat16` | 30.00 MB | model-00014-of-00015.safetensors |
 | `talker.code_predictor.model.layers.0-4.mlp.gate_proj.weight` (×5 layers) | `[3072, 1024]` | `torch.bfloat16` | 30.00 MB | model-00014-of-00015.safetensors |
@@ -1103,354 +1011,30 @@ Qwen3OmniMoeForConditionalGeneration(
 | `thinker.model.layers.0-47.self_attn.q_proj.weight` (×48 layers) | `[4096, 2048]` | `torch.bfloat16` | 768.00 MB | Multi Files |
 | `thinker.model.layers.0-47.self_attn.v_proj.weight` (×48 layers) | `[512, 2048]` | `torch.bfloat16` | 96.00 MB | Multi Files |
 | `thinker.model.norm.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00013-of-00015.safetensors |
-| `thinker.visual.blocks.0.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.0.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.1.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.2.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.3.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.4.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.5.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.6.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.7.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.8.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.9.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.10.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.11.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.12.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.13.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.14.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.15.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.16.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.17.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.18.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.19.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.20.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.21.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.22.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.23.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.24.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.25.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.attn.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.attn.proj.weight` | `[1152, 1152]` | `torch.bfloat16` | 2.53 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.attn.qkv.bias` | `[3456]` | `torch.bfloat16` | 6.75 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.attn.qkv.weight` | `[3456, 1152]` | `torch.bfloat16` | 7.59 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.mlp.linear_fc1.bias` | `[4304]` | `torch.bfloat16` | 8.41 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.mlp.linear_fc1.weight` | `[4304, 1152]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.mlp.linear_fc2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.mlp.linear_fc2.weight` | `[1152, 4304]` | `torch.bfloat16` | 9.46 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.norm1.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.norm1.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.norm2.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.blocks.26.norm2.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.attn.proj.bias` (×27 blocks) | `[1152]` | `torch.bfloat16` | 60.75 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.attn.proj.weight` (×27 blocks) | `[1152, 1152]` | `torch.bfloat16` | 68.34 MB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.attn.qkv.bias` (×27 blocks) | `[3456]` | `torch.bfloat16` | 182.25 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.attn.qkv.weight` (×27 blocks) | `[3456, 1152]` | `torch.bfloat16` | 205.03 MB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.mlp.linear_fc1.bias` (×27 blocks) | `[4304]` | `torch.bfloat16` | 226.97 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.mlp.linear_fc1.weight` (×27 blocks) | `[4304, 1152]` | `torch.bfloat16` | 255.34 MB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.mlp.linear_fc2.bias` (×27 blocks) | `[1152]` | `torch.bfloat16` | 60.75 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.mlp.linear_fc2.weight` (×27 blocks) | `[1152, 4304]` | `torch.bfloat16` | 255.34 MB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.norm1.bias` (×27 blocks) | `[1152]` | `torch.bfloat16` | 60.75 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.norm1.weight` (×27 blocks) | `[1152]` | `torch.bfloat16` | 60.75 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.norm2.bias` (×27 blocks) | `[1152]` | `torch.bfloat16` | 60.75 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.blocks.0-26.norm2.weight` (×27 blocks) | `[1152]` | `torch.bfloat16` | 60.75 KB | model-00001-of-00015.safetensors |
 | `thinker.visual.merger.ln_q.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
 | `thinker.visual.merger.ln_q.weight` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
 | `thinker.visual.merger.mlp.0.bias` | `[4608]` | `torch.bfloat16` | 9.00 KB | model-00001-of-00015.safetensors |
 | `thinker.visual.merger.mlp.0.weight` | `[4608, 4608]` | `torch.bfloat16` | 40.50 MB | model-00001-of-00015.safetensors |
 | `thinker.visual.merger.mlp.2.bias` | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00001-of-00015.safetensors |
 | `thinker.visual.merger.mlp.2.weight` | `[2048, 4608]` | `torch.bfloat16` | 18.00 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.0.ln_q.bias` | `[4608]` | `torch.bfloat16` | 9.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.0.ln_q.weight` | `[4608]` | `torch.bfloat16` | 9.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.0.mlp.0.bias` | `[4608]` | `torch.bfloat16` | 9.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.0.mlp.0.weight` | `[4608, 4608]` | `torch.bfloat16` | 40.50 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.0.mlp.2.bias` | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.0.mlp.2.weight` | `[2048, 4608]` | `torch.bfloat16` | 18.00 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.1.ln_q.bias` | `[4608]` | `torch.bfloat16` | 9.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.1.ln_q.weight` | `[4608]` | `torch.bfloat16` | 9.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.1.mlp.0.bias` | `[4608]` | `torch.bfloat16` | 9.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.1.mlp.0.weight` | `[4608, 4608]` | `torch.bfloat16` | 40.50 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.1.mlp.2.bias` | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.1.mlp.2.weight` | `[2048, 4608]` | `torch.bfloat16` | 18.00 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.2.ln_q.bias` | `[4608]` | `torch.bfloat16` | 9.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.2.ln_q.weight` | `[4608]` | `torch.bfloat16` | 9.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.2.mlp.0.bias` | `[4608]` | `torch.bfloat16` | 9.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.2.mlp.0.weight` | `[4608, 4608]` | `torch.bfloat16` | 40.50 MB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.2.mlp.2.bias` | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00001-of-00015.safetensors |
-| `thinker.visual.merger_list.2.mlp.2.weight` | `[2048, 4608]` | `torch.bfloat16` | 18.00 MB | model-00001-of-00015.safetensors |
+| `thinker.visual.merger_list.0-2.ln_q.bias` (×3 merger_list) | `[4608]` | `torch.bfloat16` | 27.00 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.merger_list.0-2.ln_q.weight` (×3 merger_list) | `[4608]` | `torch.bfloat16` | 27.00 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.merger_list.0-2.mlp.0.bias` (×3 merger_list) | `[4608]` | `torch.bfloat16` | 27.00 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.merger_list.0-2.mlp.0.weight` (×3 merger_list) | `[4608, 4608]` | `torch.bfloat16` | 121.50 MB | model-00001-of-00015.safetensors |
+| `thinker.visual.merger_list.0-2.mlp.2.bias` (×3 merger_list) | `[2048]` | `torch.bfloat16` | 12.00 KB | model-00001-of-00015.safetensors |
+| `thinker.visual.merger_list.0-2.mlp.2.weight` (×3 merger_list) | `[2048, 4608]` | `torch.bfloat16` | 54.00 MB | model-00001-of-00015.safetensors |
 | `thinker.visual.patch_embed.proj.bias` | `[1152]` | `torch.bfloat16` | 2.25 KB | model-00001-of-00015.safetensors |
 | `thinker.visual.patch_embed.proj.weight` | `[1152, 3, 2, 16, 16]` | `torch.bfloat16` | 3.38 MB | model-00001-of-00015.safetensors |
 | `thinker.visual.pos_embed.weight` | `[2304, 1152]` | `torch.bfloat16` | 5.06 MB | model-00001-of-00015.safetensors |
