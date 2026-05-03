@@ -27,6 +27,16 @@ def format_number(num: int) -> str:
     return f"{num:,}"
 
 
+def _format_bytes(nbytes: int) -> str:
+    if nbytes < 1024:
+        return f"{nbytes} B"
+    if nbytes < 1024**2:
+        return f"{nbytes / 1024:.2f} KB"
+    if nbytes < 1024**3:
+        return f"{nbytes / 1024 ** 2:.2f} MB"
+    return f"{nbytes / 1024 ** 3:.2f} GB"
+
+
 def format_size(numel: int, dtype) -> str:
     if isinstance(dtype, str):
         dtype = getattr(torch, dtype.replace("torch.", ""))
@@ -51,10 +61,8 @@ def inspect_structure(model_path: str, out) -> None:
     config = AutoConfig.from_pretrained(model_path)
     with torch.device("meta"):
         model = AutoModel.from_config(config)
-    total_params = sum(p.numel() for p in model.parameters())
     print("# 模型结构\n", file=out)
-    print(f"- **模型类**: `{type(model).__name__}`", file=out)
-    print(f"- **参数总量**: {format_number(total_params)}\n", file=out)
+    print(f"**模型类**: `{type(model).__name__}`\n", file=out)
     print("```\n" + str(model) + "\n```\n", file=out)
     print("[2/3] 模型结构解析完成 ✓", file=sys.stderr)
 
@@ -93,9 +101,7 @@ def _compress_weights(
     """
     # First pass: group experts within each layer
     # Key: (prefix, suffix) -> list of (expert_idx, weight_info)
-    expert_groups: Dict[
-        Tuple[str, str], List[Tuple[int, Tuple, int, str, str]]
-    ] = {}
+    expert_groups: Dict[Tuple[str, str], List[Tuple[int, Tuple, int, str, str]]] = {}
     non_expert: List[Tuple[str, Tuple, int, str, str]] = []
 
     for name, shape, numel, dtype, fname in all_weights:
@@ -143,9 +149,9 @@ def _compress_weights(
     combined.sort(key=lambda x: natural_sort_key(x[0]))
 
     # Second pass: group layers
-    layer_groups: Dict[
-        Tuple[str, str], List[Tuple[int, Tuple, int, str, str, str]]
-    ] = {}
+    layer_groups: Dict[Tuple[str, str], List[Tuple[int, Tuple, int, str, str, str]]] = (
+        {}
+    )
     non_layer: List[Tuple[str, Tuple, int, str, str, str]] = []
 
     for item in combined:
@@ -178,7 +184,7 @@ def _compress_weights(
             total_numel = single_numel * len(indices)
             layer_note = f"×{len(indices)} layers"
             if first_note:
-                note = f"{first_note}, {layer_note}"
+                note = f"{layer_note}, {first_note}"
             else:
                 note = layer_note
             fnames = {x[4] for x in items}
@@ -280,10 +286,32 @@ def inspect_weights(
     raw_count = len(all_weights)
 
     # 输出统计
+    total_file_size = sum(os.path.getsize(fp) for fp in weight_files)
+
+    def _resolve_dtype(dtype):
+        if isinstance(dtype, torch.dtype):
+            return dtype
+        return getattr(torch, dtype.replace("torch.", ""))
+
+    total_tensor_size = sum(
+        numel
+        * (
+            torch.finfo(d).bits // 8
+            if d.is_floating_point
+            else torch.iinfo(d).bits // 8
+        )
+        for _, _, numel, d in (
+            (_name, _sh, _ne, _resolve_dtype(_dt))
+            for _name, _sh, _ne, _dt, _ in all_weights
+        )
+    )
+
     print("# 权重统计\n", file=out)
     print(f"- **权重文件**: {len(weight_files)} 个 `{file_type}` 文件", file=out)
+    print(f"- **文件总大小**: {_format_bytes(total_file_size)}", file=out)
     print(f"- **权重张量数**: {format_number(len(all_weights))}", file=out)
     print(f"- **参数总量**: {format_number(total_params)}", file=out)
+    print(f"- **张量累计大小**: {_format_bytes(total_tensor_size)}", file=out)
 
     if compress:
         compressed = _compress_weights(all_weights)
@@ -349,16 +377,22 @@ def main():
 
     inspect_config(args.model_path, out)
     inspect_structure(args.model_path, out)
-    inspect_weights(args.model_path, out, compress=not args.no_compress, num_workers=args.num_workers)
+    inspect_weights(
+        args.model_path,
+        out,
+        compress=not args.no_compress,
+        num_workers=args.num_workers,
+    )
 
     content = buf.getvalue()
 
-    if args.output_file:
-        with open(args.output_file, "w", encoding="utf-8") as f:
-            f.write(content)
-        print(f"已输出到: {args.output_file}")
-    else:
-        print(content)
+    output_file = args.output_file
+    if not output_file:
+        folder_name = os.path.basename(args.model_path.rstrip("/"))
+        output_file = folder_name.lower().replace("-", "_") + ".md"
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"已输出到: {output_file}")
 
 
 if __name__ == "__main__":
