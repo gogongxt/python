@@ -117,51 +117,69 @@ def _try_instantiate_from_config(config):
 
 def inspect_structure(model_path: str, out) -> None:
     logger.info("[2/3] 解析模型结构...")
-    config = AutoConfig.from_pretrained(model_path)
-    model = _try_instantiate_from_config(config)
     print("# 模型结构\n", file=out)
-    if model is not None:
-        print(f"**模型类**: `{type(model).__name__}`\n", file=out)
-        print("```\n" + str(model) + "\n```\n", file=out)
-        logger.info("[2/3] 模型结构解析完成 ✓")
-    else:
-        print(
-            f"**模型类**: `{type(config).__name__}` (当前 transformers 版本不支持实例化)\n",
-            file=out,
-        )
-        logger.warning("[2/3] 模型结构解析完成 (无法实例化模型结构，仅输出配置信息)")
+    try:
+        config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
+        model = _try_instantiate_from_config(config)
+        if model is not None:
+            print(f"**模型类**: `{type(model).__name__}`\n", file=out)
+            print("```\n" + str(model) + "\n```\n", file=out)
+            logger.info("[2/3] 模型结构解析完成 ✓")
+        else:
+            print(
+                f"**模型类**: `{type(config).__name__}` (当前 transformers 版本不支持实例化)\n",
+                file=out,
+            )
+            logger.warning(
+                "[2/3] 模型结构解析完成 (无法实例化模型结构，仅输出配置信息)"
+            )
+    except Exception as e:
+        print(f"**错误**: 解析模型结构失败 - `{e}`\n", file=out)
+        logger.error("[2/3] 模型结构解析失败: %s", e)
 
 
 def inspect_config(model_path: str, out) -> None:
     logger.info("[1/3] 读取模型配置...")
-    config = AutoConfig.from_pretrained(model_path)
     print("# 模型配置\n", file=out)
-    print(f"- **模型类型**: `{type(config).__name__}`", file=out)
-    print(f"- **数据类型**: `{getattr(config, 'dtype', 'float16')}`", file=out)
-    missing_fields = []
-    for label, attr in [
-        ("隐藏层大小", "hidden_size"),
-        ("层数", "num_hidden_layers"),
-        ("注意力头数", "num_attention_heads"),
-        ("词表大小", "vocab_size"),
-        ("中间层大小", "intermediate_size"),
-    ]:
-        val = getattr(config, attr, None)
-        if val is not None:
-            print(f"- **{label}**: {val}", file=out)
+    try:
+        config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
+        print(f"- **模型类型**: `{type(config).__name__}`", file=out)
+        print(f"- **数据类型**: `{getattr(config, 'dtype', 'float16')}`", file=out)
+        missing_fields = []
+        for label, attr in [
+            ("隐藏层大小", "hidden_size"),
+            ("层数", "num_hidden_layers"),
+            ("注意力头数", "num_attention_heads"),
+            ("词表大小", "vocab_size"),
+            ("中间层大小", "intermediate_size"),
+        ]:
+            val = getattr(config, attr, None)
+            if val is not None:
+                print(f"- **{label}**: {val}", file=out)
+            else:
+                print(f"- **{label}**: N/A", file=out)
+                missing_fields.append(attr)
+        print(file=out)
+        print("<details><summary>完整配置</summary>\n", file=out)
+        print(f"```\n{config}\n```\n", file=out)
+        print("</details>\n", file=out)
+        if missing_fields:
+            logger.warning(
+                "[1/3] 模型配置读取完成 (部分字段缺失: %s)", ", ".join(missing_fields)
+            )
         else:
-            print(f"- **{label}**: N/A", file=out)
-            missing_fields.append(attr)
-    print(file=out)
-    print("<details><summary>完整配置</summary>\n", file=out)
-    print(f"```\n{config}\n```\n", file=out)
-    print("</details>\n", file=out)
-    if missing_fields:
-        logger.warning(
-            "[1/3] 模型配置读取完成 (部分字段缺失: %s)", ", ".join(missing_fields)
-        )
-    else:
-        logger.info("[1/3] 模型配置读取完成 ✓")
+            logger.info("[1/3] 模型配置读取完成 ✓")
+    except Exception as e:
+        print(f"- **错误**: 读取模型配置失败 - `{e}`\n", file=out)
+        logger.error("[1/3] 模型配置读取失败: %s", e)
+        # 尝试直接读取原始 config.json
+        config_json_path = os.path.join(model_path, "config.json")
+        if os.path.exists(config_json_path):
+            print("<details><summary>原始 config.json</summary>\n", file=out)
+            print(f"`{config_json_path}`\n\n```json\n", file=out)
+            with open(config_json_path, "r", encoding="utf-8") as f:
+                print(f.read(), file=out)
+            print("```\n</details>\n", file=out)
 
 
 def _find_numeric_segments(name: str) -> List[int]:
@@ -403,6 +421,9 @@ def main():
         "--output-file", type=str, default=None, help="输出 Markdown 文件路径（可选）"
     )
     parser.add_argument(
+        "--overwrite", "-f", action="store_true", help="覆盖已存在的输出文件"
+    )
+    parser.add_argument(
         "--no-compress",
         action="store_true",
         help="不压缩 experts/layers 权重行（默认压缩）",
@@ -417,8 +438,23 @@ def main():
 
     _setup_logging()
 
-    if os.path.exists(args.model_path) and not os.path.isdir(args.model_path):
-        logger.error("'%s' 不是有效的目录", args.model_path)
+    # 先检查模型路径是否存在
+    if not os.path.isdir(args.model_path):
+        logger.error("模型路径 '%s' 不存在或不是有效目录", args.model_path)
+        sys.exit(1)
+
+    # 确定输出文件路径并检查
+    output_file = args.output_file
+    if not output_file:
+        folder_name = os.path.basename(args.model_path.rstrip("/"))
+        output_file = os.path.join(
+            "models", folder_name.lower().replace("-", "_") + ".md"
+        )
+
+    if os.path.exists(output_file) and not args.overwrite:
+        logger.error(
+            "输出文件 '%s' 已存在，使用 --overwrite 或 -f 参数覆盖", output_file
+        )
         sys.exit(1)
 
     from io import StringIO
@@ -440,10 +476,11 @@ def main():
 
     content = buf.getvalue()
 
-    output_file = args.output_file
-    if not output_file:
-        folder_name = os.path.basename(args.model_path.rstrip("/"))
-        output_file = folder_name.lower().replace("-", "_") + ".md"
+    # 确保输出目录存在
+    output_dir = os.path.dirname(output_file)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(content)
     print(f"已输出到: {output_file}")
