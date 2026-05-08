@@ -13,10 +13,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from glob import glob
 from typing import Dict, List, Optional, Tuple
 
-import torch
-from safetensors import safe_open
 from tqdm import tqdm
-from transformers import AutoConfig, AutoModel, AutoModelForCausalLM
 
 
 def natural_sort_key(s: str) -> List:
@@ -66,6 +63,8 @@ def _format_bytes(nbytes: int) -> str:
 
 
 def format_size(numel: int, dtype) -> str:
+    import torch
+
     if isinstance(dtype, str):
         dtype = getattr(torch, dtype.replace("torch.", ""))
     element_size = (
@@ -87,6 +86,9 @@ def format_size(numel: int, dtype) -> str:
 def _try_instantiate_from_config(config):
     """Try to instantiate a model from config, using Auto classes first,
     then falling back to the architectures listed in config."""
+    import torch
+    from transformers import AutoModel, AutoModelForCausalLM
+
     with torch.device("meta"):
         # 1. Try Auto classes
         for auto_cls in (AutoModel, AutoModelForCausalLM):
@@ -116,6 +118,8 @@ def _try_instantiate_from_config(config):
 
 
 def inspect_structure(model_path: str, out) -> None:
+    from transformers import AutoConfig
+
     logger.info("[2/3] 解析模型结构...")
     print("# 模型结构\n", file=out)
     try:
@@ -139,6 +143,8 @@ def inspect_structure(model_path: str, out) -> None:
 
 
 def inspect_config(model_path: str, out) -> None:
+    from transformers import AutoConfig
+
     logger.info("[1/3] 读取模型配置...")
     print("# 模型配置\n", file=out)
     try:
@@ -274,6 +280,8 @@ def _read_safetensor_file(
     filepath: str,
 ) -> List[Tuple[str, Tuple[int, ...], int, str, str]]:
     """读取单个 safetensors 文件，返回权重信息列表。"""
+    from safetensors import safe_open
+
     fname = os.path.basename(filepath)
     results = []
     with safe_open(filepath, "pt", "cpu") as f:
@@ -288,6 +296,8 @@ def _read_bin_file(
     filepath: str,
 ) -> List[Tuple[str, Tuple[int, ...], int, str, str]]:
     """读取单个 bin 文件，返回权重信息列表。"""
+    import torch
+
     fname = os.path.basename(filepath)
     results = []
     checkpoint = torch.load(filepath, map_location="cpu", weights_only=True)
@@ -301,6 +311,8 @@ def _read_bin_file(
 def inspect_weights(
     model_path: str, out, compress: bool = True, num_workers: int = 16
 ) -> None:
+    import torch
+
     logger.info("[3/3] 扫描权重文件...")
     # 查找权重文件
     safetensor_files = sorted(glob(os.path.join(model_path, "*.safetensors")))

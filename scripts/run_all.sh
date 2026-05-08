@@ -50,6 +50,10 @@ models=(
   "/nfs/ofs-llm-ssd/models/opensource/Qwen3.6-27B"
   "/nfs/ofs-llm-ssd/models/opensource/Qwen3.6-35B-A3B"
 
+  "/nfs/ofs-llab-cold/model/moonshotai/Kimi-K2-Instruct"
+  "/nfs/ofs-llab-cold/model/moonshotai/Kimi-K2.5"
+  "/nfs/ofs-llab-cold/model/moonshotai/Kimi-Linear-48B-A3B-Instruct"
+
   "/nfs/ofs-llm-ssd/models/opensource/gpt-oss-20b"
   "/nfs/ofs-llm-ssd/models/opensource/gpt-oss-20b-bf16"
 
@@ -61,6 +65,8 @@ models=(
 
   "/nfs/ofs-llm-ssd/models/opensource/gemma-4-31B-it"
 )
+
+export HF_TRUST_REMOTE_CODE=True
 
 # 依次遍历模型
 for model_path in "${models[@]}"; do
