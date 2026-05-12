@@ -4,10 +4,6 @@
 
 # 模型配置
 
-- **错误**: 读取模型配置失败 - `The checkpoint you are trying to load has model type `deepseek_v32` but Transformers does not recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.
-
-You can update Transformers with the command `pip install --upgrade transformers`. If this does not work, and the checkpoint is very new, then there may not be a release version that supports this model yet. In this case, you can get the most up-to-date code by installing Transformers from source with the command `pip install git+https://github.com/huggingface/transformers.git``
-
 <details><summary>原始 config.json</summary>
 
 `/nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-V3.2/config.json`
@@ -84,11 +80,17 @@ You can update Transformers with the command `pip install --upgrade transformers
 ```
 </details>
 
-# 模型结构
+<details><summary>Transformers 配置</summary>
 
-**错误**: 解析模型结构失败 - `The checkpoint you are trying to load has model type `deepseek_v32` but Transformers does not recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.
+**错误**: Transformers 解析配置失败 - `The checkpoint you are trying to load has model type `deepseek_v32` but Transformers does not recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.
 
 You can update Transformers with the command `pip install --upgrade transformers`. If this does not work, and the checkpoint is very new, then there may not be a release version that supports this model yet. In this case, you can get the most up-to-date code by installing Transformers from source with the command `pip install git+https://github.com/huggingface/transformers.git``
+
+</details>
+
+# 模型结构
+
+**错误**: 解析模型结构失败
 
 # 权重统计
 
@@ -146,12 +148,12 @@ You can update Transformers with the command `pip install --upgrade transformers
 | `model.layers.3-61.mlp.shared_experts.gate_proj.weight_scale_inv` (×59 layers) | `[16, 56]` | `torch.float32` | 206.50 KB | Multi Files |
 | `model.layers.3-61.mlp.shared_experts.up_proj.weight` (×59 layers) | `[2048, 7168]` | `torch.float8_e4m3fn` | 826.00 MB | Multi Files |
 | `model.layers.3-61.mlp.shared_experts.up_proj.weight_scale_inv` (×59 layers) | `[16, 56]` | `torch.float32` | 206.50 KB | Multi Files |
-| `model.layers.61.eh_proj.weight` (×1 layers) | `[7168, 14336]` | `torch.bfloat16` | 196.00 MB | model-00163-of-000163.safetensors |
-| `model.layers.61.embed_tokens.weight` (×1 layers) | `[129280, 7168]` | `torch.bfloat16` | 1.73 GB | model-00163-of-000163.safetensors |
-| `model.layers.61.enorm.weight` (×1 layers) | `[7168]` | `torch.float32` | 28.00 KB | model-00163-of-000163.safetensors |
-| `model.layers.61.hnorm.weight` (×1 layers) | `[7168]` | `torch.float32` | 28.00 KB | model-00163-of-000163.safetensors |
-| `model.layers.61.shared_head.head.weight` (×1 layers) | `[129280, 7168]` | `torch.bfloat16` | 1.73 GB | model-00163-of-000163.safetensors |
-| `model.layers.61.shared_head.norm.weight` (×1 layers) | `[7168]` | `torch.float32` | 28.00 KB | model-00163-of-000163.safetensors |
+| `model.layers.61.eh_proj.weight` | `[7168, 14336]` | `torch.bfloat16` | 196.00 MB | model-00163-of-000163.safetensors |
+| `model.layers.61.embed_tokens.weight` | `[129280, 7168]` | `torch.bfloat16` | 1.73 GB | model-00163-of-000163.safetensors |
+| `model.layers.61.enorm.weight` | `[7168]` | `torch.float32` | 28.00 KB | model-00163-of-000163.safetensors |
+| `model.layers.61.hnorm.weight` | `[7168]` | `torch.float32` | 28.00 KB | model-00163-of-000163.safetensors |
+| `model.layers.61.shared_head.head.weight` | `[129280, 7168]` | `torch.bfloat16` | 1.73 GB | model-00163-of-000163.safetensors |
+| `model.layers.61.shared_head.norm.weight` | `[7168]` | `torch.float32` | 28.00 KB | model-00163-of-000163.safetensors |
 | `model.norm.weight` | `[7168]` | `torch.float32` | 28.00 KB | model-00160-of-000163.safetensors |
 
 </details>

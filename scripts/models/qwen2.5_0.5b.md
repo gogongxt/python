@@ -4,6 +4,46 @@
 
 # 模型配置
 
+<details><summary>原始 config.json</summary>
+
+`/nfs/ofs-llm-ssd/models/opensource/Qwen2.5-0.5B/config.json`
+
+```json
+
+{
+  "architectures": [
+    "Qwen2ForCausalLM"
+  ],
+  "attention_dropout": 0.0,
+  "bos_token_id": 151643,
+  "eos_token_id": 151643,
+  "hidden_act": "silu",
+  "hidden_size": 896,
+  "initializer_range": 0.02,
+  "intermediate_size": 4864,
+  "max_position_embeddings": 32768,
+  "max_window_layers": 24,
+  "model_type": "qwen2",
+  "num_attention_heads": 14,
+  "num_hidden_layers": 24,
+  "num_key_value_heads": 2,
+  "rms_norm_eps": 1e-06,
+  "rope_theta": 1000000.0,
+  "sliding_window": 32768,
+  "tie_word_embeddings": true,
+  "torch_dtype": "bfloat16",
+  "transformers_version": "4.40.1",
+  "use_cache": true,
+  "use_mrope": false,
+  "use_sliding_window": false,
+  "vocab_size": 151936
+}
+
+```
+</details>
+
+<details><summary>Transformers 配置</summary>
+
 - **模型类型**: `Qwen2Config`
 - **数据类型**: `torch.bfloat16`
 - **隐藏层大小**: 896
@@ -11,8 +51,6 @@
 - **注意力头数**: 14
 - **词表大小**: 151936
 - **中间层大小**: 4864
-
-<details><summary>完整配置</summary>
 
 ```
 Qwen2Config {

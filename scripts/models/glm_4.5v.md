@@ -4,6 +4,94 @@
 
 # 模型配置
 
+<details><summary>原始 config.json</summary>
+
+`/nfs/ofs-llm-ssd/models/opensource/GLM-4.5V/config.json`
+
+```json
+
+{
+  "architectures": [
+    "Glm4vMoeForConditionalGeneration"
+  ],
+  "model_type": "glm4v_moe",
+  "text_config": {
+    "pad_token_id": 151329,
+    "vocab_size": 151552,
+    "eos_token_id": [
+      151329,
+      151336,
+      151338
+    ],
+    "image_end_token_id": 151340,
+    "image_start_token_id": 151339,
+    "image_token_id": 151363,
+    "head_dim": 128,
+    "attention_bias": true,
+    "attention_dropout": 0.0,
+    "first_k_dense_replace": 1,
+    "hidden_act": "silu",
+    "hidden_size": 4096,
+    "initializer_range": 0.02,
+    "intermediate_size": 10944,
+    "max_position_embeddings": 65536,
+    "model_type": "glm4v_moe_text",
+    "moe_intermediate_size": 1408,
+    "n_group": 1,
+    "n_routed_experts": 128,
+    "n_shared_experts": 1,
+    "norm_topk_prob": true,
+    "num_attention_heads": 96,
+    "num_experts_per_tok": 8,
+    "num_hidden_layers": 46,
+    "num_key_value_heads": 8,
+    "partial_rotary_factor": 0.5,
+    "rms_norm_eps": 1e-05,
+    "torch_dtype": "bfloat16",
+    "rope_scaling": {
+      "rope_type": "default",
+      "mrope_section": [
+        8,
+        12,
+        12
+      ]
+    },
+    "rope_theta": 10000.0,
+    "routed_scaling_factor": 1.0,
+    "topk_group": 1,
+    "use_cache": true,
+    "use_qk_norm": false
+  },
+  "torch_dtype": "bfloat16",
+  "transformers_version": "4.55.0.dev0",
+  "video_end_token_id": 151342,
+  "video_start_token_id": 151341,
+  "video_token_id": 151364,
+  "vision_config": {
+    "attention_bias": false,
+    "attention_dropout": 0.0,
+    "depth": 24,
+    "hidden_act": "silu",
+    "hidden_size": 1536,
+    "image_size": 336,
+    "in_channels": 3,
+    "initializer_range": 0.02,
+    "intermediate_size": 10944,
+    "model_type": "glm4v_moe",
+    "num_heads": 12,
+    "out_hidden_size": 4096,
+    "patch_size": 14,
+    "rms_norm_eps": 1e-05,
+    "spatial_merge_size": 2,
+    "temporal_patch_size": 2
+  }
+}
+
+```
+</details>
+
+<details><summary>Transformers 配置</summary>
+
 - **模型类型**: `Glm4vMoeConfig`
 - **数据类型**: `torch.bfloat16`
 - **隐藏层大小**: N/A
@@ -11,8 +99,6 @@
 - **注意力头数**: N/A
 - **词表大小**: N/A
 - **中间层大小**: N/A
-
-<details><summary>完整配置</summary>
 
 ```
 Glm4vMoeConfig {
@@ -219,9 +305,9 @@ Glm4vMoeModel(
 | `model.language_model.layers.0-45.self_attn.q_proj.weight` (×46 layers) | `[12288, 4096]` | `torch.bfloat16` | 4.31 GB | Multi Files |
 | `model.language_model.layers.0-45.self_attn.v_proj.bias` (×46 layers) | `[1024]` | `torch.bfloat16` | 92.00 KB | Multi Files |
 | `model.language_model.layers.0-45.self_attn.v_proj.weight` (×46 layers) | `[1024, 4096]` | `torch.bfloat16` | 368.00 MB | Multi Files |
-| `model.language_model.layers.0.mlp.down_proj.weight` (×1 layers) | `[4096, 10944]` | `torch.bfloat16` | 85.50 MB | model-00001-of-00046.safetensors |
-| `model.language_model.layers.0.mlp.gate_proj.weight` (×1 layers) | `[10944, 4096]` | `torch.bfloat16` | 85.50 MB | model-00001-of-00046.safetensors |
-| `model.language_model.layers.0.mlp.up_proj.weight` (×1 layers) | `[10944, 4096]` | `torch.bfloat16` | 85.50 MB | model-00001-of-00046.safetensors |
+| `model.language_model.layers.0.mlp.down_proj.weight` | `[4096, 10944]` | `torch.bfloat16` | 85.50 MB | model-00001-of-00046.safetensors |
+| `model.language_model.layers.0.mlp.gate_proj.weight` | `[10944, 4096]` | `torch.bfloat16` | 85.50 MB | model-00001-of-00046.safetensors |
+| `model.language_model.layers.0.mlp.up_proj.weight` | `[10944, 4096]` | `torch.bfloat16` | 85.50 MB | model-00001-of-00046.safetensors |
 | `model.language_model.layers.1-45.mlp.experts.0-127.down_proj.weight` (×45 layers, ×128 experts) | `[4096, 1408]` | `torch.bfloat16` | 61.88 GB | Multi Files |
 | `model.language_model.layers.1-45.mlp.experts.0-127.gate_proj.weight` (×45 layers, ×128 experts) | `[1408, 4096]` | `torch.bfloat16` | 61.88 GB | Multi Files |
 | `model.language_model.layers.1-45.mlp.experts.0-127.up_proj.weight` (×45 layers, ×128 experts) | `[1408, 4096]` | `torch.bfloat16` | 61.88 GB | Multi Files |

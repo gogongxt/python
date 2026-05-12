@@ -4,6 +4,132 @@
 
 # 模型配置
 
+<details><summary>原始 config.json</summary>
+
+`/nfs/ofs-llm-ssd/models/opensource/Qwen3.5-35B-A3B/config.json`
+
+```json
+
+{
+    "architectures": [
+        "Qwen3_5MoeForConditionalGeneration"
+    ],
+    "image_token_id": 248056,
+    "model_type": "qwen3_5_moe",
+    "text_config": {
+        "attention_bias": false,
+        "attention_dropout": 0.0,
+        "attn_output_gate": true,
+        "dtype": "bfloat16",
+        "eos_token_id": 248044,
+        "full_attention_interval": 4,
+        "head_dim": 256,
+        "hidden_act": "silu",
+        "hidden_size": 2048,
+        "initializer_range": 0.02,
+        "layer_types": [
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention"
+        ],
+        "linear_conv_kernel_dim": 4,
+        "linear_key_head_dim": 128,
+        "linear_num_key_heads": 16,
+        "linear_num_value_heads": 32,
+        "linear_value_head_dim": 128,
+        "max_position_embeddings": 262144,
+        "mlp_only_layers": [],
+        "model_type": "qwen3_5_moe_text",
+        "moe_intermediate_size": 512,
+        "mtp_num_hidden_layers": 1,
+        "mtp_use_dedicated_embeddings": false,
+        "num_attention_heads": 16,
+        "num_experts": 256,
+        "num_experts_per_tok": 8,
+        "num_hidden_layers": 40,
+        "num_key_value_heads": 2,
+        "rms_norm_eps": 1e-06,
+        "router_aux_loss_coef": 0.001,
+        "shared_expert_intermediate_size": 512,
+        "use_cache": true,
+        "vocab_size": 248320,
+        "mamba_ssm_dtype": "float32",
+        "rope_parameters": {
+            "mrope_interleaved": true,
+            "mrope_section": [
+                11,
+                11,
+                10
+            ],
+            "rope_type": "default",
+            "rope_theta": 10000000,
+            "partial_rotary_factor": 0.25
+        }
+    },
+    "tie_word_embeddings": false,
+    "transformers_version": "4.57.0.dev0",
+    "video_token_id": 248057,
+    "vision_config": {
+        "deepstack_visual_indexes": [],
+        "depth": 27,
+        "hidden_act": "gelu_pytorch_tanh",
+        "hidden_size": 1152,
+        "in_channels": 3,
+        "initializer_range": 0.02,
+        "intermediate_size": 4304,
+        "model_type": "qwen3_5_moe",
+        "num_heads": 16,
+        "num_position_embeddings": 2304,
+        "out_hidden_size": 2048,
+        "patch_size": 16,
+        "spatial_merge_size": 2,
+        "temporal_patch_size": 2
+    },
+    "vision_end_token_id": 248054,
+    "vision_start_token_id": 248053
+}
+```
+</details>
+
+<details><summary>Transformers 配置</summary>
+
 - **模型类型**: `Qwen3_5MoeConfig`
 - **数据类型**: `None`
 - **隐藏层大小**: N/A
@@ -11,8 +137,6 @@
 - **注意力头数**: N/A
 - **词表大小**: N/A
 - **中间层大小**: N/A
-
-<details><summary>完整配置</summary>
 
 ```
 Qwen3_5MoeConfig {
@@ -719,15 +843,15 @@ Qwen3_5MoeModel(
 | --- | --- | --- | --- | --- |
 | `lm_head.weight` | `[248320, 2048]` | `torch.bfloat16` | 970.00 MB | model.safetensors-00009-of-00014.safetensors |
 | `model.language_model.embed_tokens.weight` | `[248320, 2048]` | `torch.bfloat16` | 970.00 MB | model.safetensors-00009-of-00014.safetensors |
-| `model.language_model.layers.0-38.linear_attn.A_log` (×30 layers) | `[32]` | `torch.float32` | 3.75 KB | model.safetensors-00014-of-00014.safetensors |
-| `model.language_model.layers.0-38.linear_attn.conv1d.weight` (×30 layers) | `[8192, 1, 4]` | `torch.bfloat16` | 1.88 MB | model.safetensors-00014-of-00014.safetensors |
-| `model.language_model.layers.0-38.linear_attn.dt_bias` (×30 layers) | `[32]` | `torch.bfloat16` | 1.88 KB | model.safetensors-00014-of-00014.safetensors |
-| `model.language_model.layers.0-38.linear_attn.in_proj_a.weight` (×30 layers) | `[32, 2048]` | `torch.bfloat16` | 3.75 MB | model.safetensors-00014-of-00014.safetensors |
-| `model.language_model.layers.0-38.linear_attn.in_proj_b.weight` (×30 layers) | `[32, 2048]` | `torch.bfloat16` | 3.75 MB | model.safetensors-00014-of-00014.safetensors |
-| `model.language_model.layers.0-38.linear_attn.in_proj_qkv.weight` (×30 layers) | `[8192, 2048]` | `torch.bfloat16` | 960.00 MB | model.safetensors-00013-of-00014.safetensors |
-| `model.language_model.layers.0-38.linear_attn.in_proj_z.weight` (×30 layers) | `[4096, 2048]` | `torch.bfloat16` | 480.00 MB | model.safetensors-00013-of-00014.safetensors |
-| `model.language_model.layers.0-38.linear_attn.norm.weight` (×30 layers) | `[128]` | `torch.float32` | 15.00 KB | model.safetensors-00014-of-00014.safetensors |
-| `model.language_model.layers.0-38.linear_attn.out_proj.weight` (×30 layers) | `[2048, 4096]` | `torch.bfloat16` | 480.00 MB | model.safetensors-00013-of-00014.safetensors |
+| `model.language_model.layers.0-2,4-6,8-10,12-14,16-18,20-22,24-26,28-30,32-34,36-38.linear_attn.A_log` (×30 layers) | `[32]` | `torch.float32` | 3.75 KB | model.safetensors-00014-of-00014.safetensors |
+| `model.language_model.layers.0-2,4-6,8-10,12-14,16-18,20-22,24-26,28-30,32-34,36-38.linear_attn.conv1d.weight` (×30 layers) | `[8192, 1, 4]` | `torch.bfloat16` | 1.88 MB | model.safetensors-00014-of-00014.safetensors |
+| `model.language_model.layers.0-2,4-6,8-10,12-14,16-18,20-22,24-26,28-30,32-34,36-38.linear_attn.dt_bias` (×30 layers) | `[32]` | `torch.bfloat16` | 1.88 KB | model.safetensors-00014-of-00014.safetensors |
+| `model.language_model.layers.0-2,4-6,8-10,12-14,16-18,20-22,24-26,28-30,32-34,36-38.linear_attn.in_proj_a.weight` (×30 layers) | `[32, 2048]` | `torch.bfloat16` | 3.75 MB | model.safetensors-00014-of-00014.safetensors |
+| `model.language_model.layers.0-2,4-6,8-10,12-14,16-18,20-22,24-26,28-30,32-34,36-38.linear_attn.in_proj_b.weight` (×30 layers) | `[32, 2048]` | `torch.bfloat16` | 3.75 MB | model.safetensors-00014-of-00014.safetensors |
+| `model.language_model.layers.0-2,4-6,8-10,12-14,16-18,20-22,24-26,28-30,32-34,36-38.linear_attn.in_proj_qkv.weight` (×30 layers) | `[8192, 2048]` | `torch.bfloat16` | 960.00 MB | model.safetensors-00013-of-00014.safetensors |
+| `model.language_model.layers.0-2,4-6,8-10,12-14,16-18,20-22,24-26,28-30,32-34,36-38.linear_attn.in_proj_z.weight` (×30 layers) | `[4096, 2048]` | `torch.bfloat16` | 480.00 MB | model.safetensors-00013-of-00014.safetensors |
+| `model.language_model.layers.0-2,4-6,8-10,12-14,16-18,20-22,24-26,28-30,32-34,36-38.linear_attn.norm.weight` (×30 layers) | `[128]` | `torch.float32` | 15.00 KB | model.safetensors-00014-of-00014.safetensors |
+| `model.language_model.layers.0-2,4-6,8-10,12-14,16-18,20-22,24-26,28-30,32-34,36-38.linear_attn.out_proj.weight` (×30 layers) | `[2048, 4096]` | `torch.bfloat16` | 480.00 MB | model.safetensors-00013-of-00014.safetensors |
 | `model.language_model.layers.0-39.input_layernorm.weight` (×40 layers) | `[2048]` | `torch.bfloat16` | 160.00 KB | model.safetensors-00014-of-00014.safetensors |
 | `model.language_model.layers.0-39.mlp.experts.down_proj` (×40 layers) | `[256, 2048, 512]` | `torch.bfloat16` | 20.00 GB | Multi Files |
 | `model.language_model.layers.0-39.mlp.experts.gate_up_proj` (×40 layers) | `[256, 1024, 2048]` | `torch.bfloat16` | 40.00 GB | Multi Files |
@@ -737,12 +861,12 @@ Qwen3_5MoeModel(
 | `model.language_model.layers.0-39.mlp.shared_expert.up_proj.weight` (×40 layers) | `[512, 2048]` | `torch.bfloat16` | 80.00 MB | model.safetensors-00014-of-00014.safetensors |
 | `model.language_model.layers.0-39.mlp.shared_expert_gate.weight` (×40 layers) | `[1, 2048]` | `torch.bfloat16` | 160.00 KB | model.safetensors-00014-of-00014.safetensors |
 | `model.language_model.layers.0-39.post_attention_layernorm.weight` (×40 layers) | `[2048]` | `torch.bfloat16` | 160.00 KB | model.safetensors-00014-of-00014.safetensors |
-| `model.language_model.layers.3-39.self_attn.k_norm.weight` (×10 layers) | `[256]` | `torch.bfloat16` | 5.00 KB | model.safetensors-00014-of-00014.safetensors |
-| `model.language_model.layers.3-39.self_attn.k_proj.weight` (×10 layers) | `[512, 2048]` | `torch.bfloat16` | 20.00 MB | model.safetensors-00014-of-00014.safetensors |
-| `model.language_model.layers.3-39.self_attn.o_proj.weight` (×10 layers) | `[2048, 4096]` | `torch.bfloat16` | 160.00 MB | model.safetensors-00013-of-00014.safetensors |
-| `model.language_model.layers.3-39.self_attn.q_norm.weight` (×10 layers) | `[256]` | `torch.bfloat16` | 5.00 KB | model.safetensors-00014-of-00014.safetensors |
-| `model.language_model.layers.3-39.self_attn.q_proj.weight` (×10 layers) | `[8192, 2048]` | `torch.bfloat16` | 320.00 MB | model.safetensors-00013-of-00014.safetensors |
-| `model.language_model.layers.3-39.self_attn.v_proj.weight` (×10 layers) | `[512, 2048]` | `torch.bfloat16` | 20.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `model.language_model.layers.3,7,...,35,39.self_attn.k_norm.weight` (×10 layers) | `[256]` | `torch.bfloat16` | 5.00 KB | model.safetensors-00014-of-00014.safetensors |
+| `model.language_model.layers.3,7,...,35,39.self_attn.k_proj.weight` (×10 layers) | `[512, 2048]` | `torch.bfloat16` | 20.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `model.language_model.layers.3,7,...,35,39.self_attn.o_proj.weight` (×10 layers) | `[2048, 4096]` | `torch.bfloat16` | 160.00 MB | model.safetensors-00013-of-00014.safetensors |
+| `model.language_model.layers.3,7,...,35,39.self_attn.q_norm.weight` (×10 layers) | `[256]` | `torch.bfloat16` | 5.00 KB | model.safetensors-00014-of-00014.safetensors |
+| `model.language_model.layers.3,7,...,35,39.self_attn.q_proj.weight` (×10 layers) | `[8192, 2048]` | `torch.bfloat16` | 320.00 MB | model.safetensors-00013-of-00014.safetensors |
+| `model.language_model.layers.3,7,...,35,39.self_attn.v_proj.weight` (×10 layers) | `[512, 2048]` | `torch.bfloat16` | 20.00 MB | model.safetensors-00014-of-00014.safetensors |
 | `model.language_model.norm.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model.safetensors-00014-of-00014.safetensors |
 | `model.visual.blocks.0-26.attn.proj.bias` (×27 blocks) | `[1152]` | `torch.bfloat16` | 60.75 KB | model.safetensors-00014-of-00014.safetensors |
 | `model.visual.blocks.0-26.attn.proj.weight` (×27 blocks) | `[1152, 1152]` | `torch.bfloat16` | 68.34 MB | model.safetensors-00014-of-00014.safetensors |
@@ -766,22 +890,22 @@ Qwen3_5MoeModel(
 | `model.visual.patch_embed.proj.weight` | `[1152, 3, 2, 16, 16]` | `torch.bfloat16` | 3.38 MB | model.safetensors-00014-of-00014.safetensors |
 | `model.visual.pos_embed.weight` | `[2304, 1152]` | `torch.bfloat16` | 5.06 MB | model.safetensors-00014-of-00014.safetensors |
 | `mtp.fc.weight` | `[2048, 4096]` | `torch.bfloat16` | 16.00 MB | model.safetensors-00013-of-00014.safetensors |
-| `mtp.layers.0.input_layernorm.weight` (×1 layers) | `[2048]` | `torch.bfloat16` | 4.00 KB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.mlp.experts.0-255.down_proj.weight` (×1 layers, ×256 experts) | `[2048, 512]` | `torch.bfloat16` | 512.00 MB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.mlp.experts.0-255.gate_proj.weight` (×1 layers, ×256 experts) | `[512, 2048]` | `torch.bfloat16` | 512.00 MB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.mlp.experts.0-255.up_proj.weight` (×1 layers, ×256 experts) | `[512, 2048]` | `torch.bfloat16` | 512.00 MB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.mlp.gate.weight` (×1 layers) | `[256, 2048]` | `torch.bfloat16` | 1.00 MB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.mlp.shared_expert.down_proj.weight` (×1 layers) | `[2048, 512]` | `torch.bfloat16` | 2.00 MB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.mlp.shared_expert.gate_proj.weight` (×1 layers) | `[512, 2048]` | `torch.bfloat16` | 2.00 MB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.mlp.shared_expert.up_proj.weight` (×1 layers) | `[512, 2048]` | `torch.bfloat16` | 2.00 MB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.mlp.shared_expert_gate.weight` (×1 layers) | `[1, 2048]` | `torch.bfloat16` | 4.00 KB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.post_attention_layernorm.weight` (×1 layers) | `[2048]` | `torch.bfloat16` | 4.00 KB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.self_attn.k_norm.weight` (×1 layers) | `[256]` | `torch.bfloat16` | 512.00 B | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.self_attn.k_proj.weight` (×1 layers) | `[512, 2048]` | `torch.bfloat16` | 2.00 MB | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.self_attn.o_proj.weight` (×1 layers) | `[2048, 4096]` | `torch.bfloat16` | 16.00 MB | model.safetensors-00013-of-00014.safetensors |
-| `mtp.layers.0.self_attn.q_norm.weight` (×1 layers) | `[256]` | `torch.bfloat16` | 512.00 B | model.safetensors-00014-of-00014.safetensors |
-| `mtp.layers.0.self_attn.q_proj.weight` (×1 layers) | `[8192, 2048]` | `torch.bfloat16` | 32.00 MB | model.safetensors-00013-of-00014.safetensors |
-| `mtp.layers.0.self_attn.v_proj.weight` (×1 layers) | `[512, 2048]` | `torch.bfloat16` | 2.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.input_layernorm.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.mlp.experts.0-255.down_proj.weight` (×256 experts) | `[2048, 512]` | `torch.bfloat16` | 512.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.mlp.experts.0-255.gate_proj.weight` (×256 experts) | `[512, 2048]` | `torch.bfloat16` | 512.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.mlp.experts.0-255.up_proj.weight` (×256 experts) | `[512, 2048]` | `torch.bfloat16` | 512.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.mlp.gate.weight` | `[256, 2048]` | `torch.bfloat16` | 1.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.mlp.shared_expert.down_proj.weight` | `[2048, 512]` | `torch.bfloat16` | 2.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.mlp.shared_expert.gate_proj.weight` | `[512, 2048]` | `torch.bfloat16` | 2.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.mlp.shared_expert.up_proj.weight` | `[512, 2048]` | `torch.bfloat16` | 2.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.mlp.shared_expert_gate.weight` | `[1, 2048]` | `torch.bfloat16` | 4.00 KB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.post_attention_layernorm.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.self_attn.k_norm.weight` | `[256]` | `torch.bfloat16` | 512.00 B | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.self_attn.k_proj.weight` | `[512, 2048]` | `torch.bfloat16` | 2.00 MB | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.self_attn.o_proj.weight` | `[2048, 4096]` | `torch.bfloat16` | 16.00 MB | model.safetensors-00013-of-00014.safetensors |
+| `mtp.layers.0.self_attn.q_norm.weight` | `[256]` | `torch.bfloat16` | 512.00 B | model.safetensors-00014-of-00014.safetensors |
+| `mtp.layers.0.self_attn.q_proj.weight` | `[8192, 2048]` | `torch.bfloat16` | 32.00 MB | model.safetensors-00013-of-00014.safetensors |
+| `mtp.layers.0.self_attn.v_proj.weight` | `[512, 2048]` | `torch.bfloat16` | 2.00 MB | model.safetensors-00014-of-00014.safetensors |
 | `mtp.norm.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model.safetensors-00014-of-00014.safetensors |
 | `mtp.pre_fc_norm_embedding.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model.safetensors-00014-of-00014.safetensors |
 | `mtp.pre_fc_norm_hidden.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model.safetensors-00014-of-00014.safetensors |

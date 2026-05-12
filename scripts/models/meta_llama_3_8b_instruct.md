@@ -4,6 +4,45 @@
 
 # 模型配置
 
+<details><summary>原始 config.json</summary>
+
+`/nfs/ofs-llm-ssd/models/opensource/Meta-Llama-3-8B-Instruct/config.json`
+
+```json
+
+{
+  "architectures": [
+    "LlamaForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "bos_token_id": 128000,
+  "eos_token_id": 128001,
+  "hidden_act": "silu",
+  "hidden_size": 4096,
+  "initializer_range": 0.02,
+  "intermediate_size": 14336,
+  "max_position_embeddings": 8192,
+  "model_type": "llama",
+  "num_attention_heads": 32,
+  "num_hidden_layers": 32,
+  "num_key_value_heads": 8,
+  "pretraining_tp": 1,
+  "rms_norm_eps": 1e-05,
+  "rope_scaling": null,
+  "rope_theta": 500000.0,
+  "tie_word_embeddings": false,
+  "torch_dtype": "bfloat16",
+  "transformers_version": "4.40.0.dev0",
+  "use_cache": true,
+  "vocab_size": 128256
+}
+
+```
+</details>
+
+<details><summary>Transformers 配置</summary>
+
 - **模型类型**: `LlamaConfig`
 - **数据类型**: `torch.bfloat16`
 - **隐藏层大小**: 4096
@@ -11,8 +50,6 @@
 - **注意力头数**: 32
 - **词表大小**: 128256
 - **中间层大小**: 14336
-
-<details><summary>完整配置</summary>
 
 ```
 LlamaConfig {

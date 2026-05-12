@@ -52,6 +52,28 @@ def _setup_logging() -> None:
     logger.setLevel(logging.INFO)
 
 
+# safetensors dtype → (torch dtype 字符串, 每个元素字节数)
+# 新 dtype 出现时在此添加即可
+_ST_DTYPE_INFO = {
+    "BOOL": ("torch.bool", 1),
+    "U8": ("torch.uint8", 1),
+    "I8": ("torch.int8", 1),
+    "I16": ("torch.int16", 2),
+    "I32": ("torch.int32", 4),
+    "I64": ("torch.int64", 8),
+    "F16": ("torch.float16", 2),
+    "BF16": ("torch.bfloat16", 2),
+    "F32": ("torch.float32", 4),
+    "F64": ("torch.float64", 8),
+    "F8_E4M3": ("torch.float8_e4m3fn", 1),
+    "F8_E5M2": ("torch.float8_e5m2", 1),
+    "F8_E8M0": ("torch.float8_e8m0fnu", 1),
+    "U16": ("torch.uint16", 2),
+    "U32": ("torch.uint32", 4),
+    "U64": ("torch.uint64", 8),
+}
+
+
 def _format_bytes(nbytes: int) -> str:
     if nbytes < 1024:
         return f"{nbytes} B"
@@ -63,15 +85,18 @@ def _format_bytes(nbytes: int) -> str:
 
 
 def format_size(numel: int, dtype) -> str:
-    import torch
+    if isinstance(dtype, str) and dtype in _ST_DTYPE_INFO:
+        element_size = _ST_DTYPE_INFO[dtype][1]
+    else:
+        import torch
 
-    if isinstance(dtype, str):
-        dtype = getattr(torch, dtype.replace("torch.", ""))
-    element_size = (
-        torch.finfo(dtype).bits // 8
-        if dtype.is_floating_point
-        else torch.iinfo(dtype).bits // 8
-    )
+        if isinstance(dtype, str):
+            dtype = getattr(torch, dtype.replace("torch.", ""))
+        element_size = (
+            torch.finfo(dtype).bits // 8
+            if dtype.is_floating_point
+            else torch.iinfo(dtype).bits // 8
+        )
     size_kb = (numel * element_size) / 1024
     if size_kb < 1:
         return f"{size_kb * 1024:.2f} B"
@@ -122,14 +147,26 @@ def inspect_structure(model_path: str, out) -> None:
 
     logger.info("[2/3] 解析模型结构...")
     print("# 模型结构\n", file=out)
+
+    # 先尝试 trust_remote_code=False（使用 transformers 内置类，更稳定），
+    # 失败后回退到 trust_remote_code=True（使用模型自定义代码）
+    config = None
+    model = None
+    for trust in (False, True):
+        try:
+            config = AutoConfig.from_pretrained(model_path, trust_remote_code=trust)
+            model = _try_instantiate_from_config(config)
+            if model is not None:
+                break
+        except Exception:
+            continue
+
     try:
-        config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
-        model = _try_instantiate_from_config(config)
         if model is not None:
             print(f"**模型类**: `{type(model).__name__}`\n", file=out)
             print("```\n" + str(model) + "\n```\n", file=out)
             logger.info("[2/3] 模型结构解析完成 ✓")
-        else:
+        elif config is not None:
             print(
                 f"**模型类**: `{type(config).__name__}` (当前 transformers 版本不支持实例化)\n",
                 file=out,
@@ -137,6 +174,9 @@ def inspect_structure(model_path: str, out) -> None:
             logger.warning(
                 "[2/3] 模型结构解析完成 (无法实例化模型结构，仅输出配置信息)"
             )
+        else:
+            print("**错误**: 解析模型结构失败\n", file=out)
+            logger.error("[2/3] 模型结构解析失败: 无法加载配置")
     except Exception as e:
         print(f"**错误**: 解析模型结构失败 - `{e}`\n", file=out)
         logger.error("[2/3] 模型结构解析失败: %s", e)
@@ -147,6 +187,17 @@ def inspect_config(model_path: str, out) -> None:
 
     logger.info("[1/3] 读取模型配置...")
     print("# 模型配置\n", file=out)
+    # 始终输出原始 config.json
+    config_json_path = os.path.join(model_path, "config.json")
+    if os.path.exists(config_json_path):
+        print("<details><summary>原始 config.json</summary>\n", file=out)
+        print(f"`{config_json_path}`\n\n```json\n", file=out)
+        with open(config_json_path, "r", encoding="utf-8") as f:
+            print(f.read(), file=out)
+        print("```\n</details>\n", file=out)
+
+    # 输出 transformers 解析后的配置
+    print("<details><summary>Transformers 配置</summary>\n", file=out)
     try:
         config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
         print(f"- **模型类型**: `{type(config).__name__}`", file=out)
@@ -166,9 +217,7 @@ def inspect_config(model_path: str, out) -> None:
                 print(f"- **{label}**: N/A", file=out)
                 missing_fields.append(attr)
         print(file=out)
-        print("<details><summary>完整配置</summary>\n", file=out)
         print(f"```\n{config}\n```\n", file=out)
-        print("</details>\n", file=out)
         if missing_fields:
             logger.warning(
                 "[1/3] 模型配置读取完成 (部分字段缺失: %s)", ", ".join(missing_fields)
@@ -176,16 +225,98 @@ def inspect_config(model_path: str, out) -> None:
         else:
             logger.info("[1/3] 模型配置读取完成 ✓")
     except Exception as e:
-        print(f"- **错误**: 读取模型配置失败 - `{e}`\n", file=out)
-        logger.error("[1/3] 模型配置读取失败: %s", e)
-        # 尝试直接读取原始 config.json
-        config_json_path = os.path.join(model_path, "config.json")
-        if os.path.exists(config_json_path):
-            print("<details><summary>原始 config.json</summary>\n", file=out)
-            print(f"`{config_json_path}`\n\n```json\n", file=out)
-            with open(config_json_path, "r", encoding="utf-8") as f:
-                print(f.read(), file=out)
-            print("```\n</details>\n", file=out)
+        print(f"**错误**: Transformers 解析配置失败 - `{e}`\n", file=out)
+        logger.error("[1/3] Transformers 解析配置失败: %s", e)
+    print("</details>\n", file=out)
+
+
+def _format_indices(indices: List[int]) -> str:
+    """Format a list of integer indices into a compact string.
+
+    Finds maximal arithmetic sub-sequences (constant gap between consecutive
+    elements) and formats each with dashes (step=1) or dots (step>1).
+
+    Examples:
+        [0, 1, 3, 5, ..., 59] → ``0-1,3,5,...,57,59``
+        [2, 4, 6, ..., 42]    → ``2,4,...,40,42``
+        [2, 4, 6]             → ``2,4,6``
+        [0, 1, 2, 3, 4, 5]    → ``0-5``
+    """
+    if len(indices) <= 1:
+        return ",".join(str(i) for i in indices)
+
+    # 1. Compute gaps and find step-change positions
+    gaps = [indices[i] - indices[i - 1] for i in range(1, len(indices))]
+    # When gaps[i] != gaps[i-1], a new step starts at position i+1 in `indices`.
+    # So the previous run ends at position i, and the new run starts at i+1.
+    # Position i (the shared element) belongs to the previous run.
+    step_starts = [0]  # start positions of each run in `indices`
+    for i in range(1, len(gaps)):
+        if gaps[i] != gaps[i - 1]:
+            step_starts.append(i + 1)  # new run starts at indices[i+1]
+    step_starts.append(len(indices))
+
+    # 2. Build runs: indices[lo..hi) (exclusive hi), then merge 1-element runs
+    raw_runs: List[Tuple[int, int, int]] = []  # (start, end, step)
+    for k in range(len(step_starts) - 1):
+        lo = step_starts[k]
+        hi = step_starts[k + 1]  # exclusive
+        start = indices[lo]
+        end = indices[hi - 1]
+        if hi - lo >= 2:
+            step = indices[lo + 1] - start
+        elif k + 1 < len(step_starts) - 1:
+            step = indices[step_starts[k + 1]] - start
+        else:
+            step = 1
+        raw_runs.append((start, end, step))
+
+    runs: List[Tuple[int, int, int]] = list(raw_runs)
+
+    # Merge 1-element runs into adjacent runs whose step they continue.
+    i = len(runs) - 2
+    while i >= 0:
+        s, e, st = runs[i]
+        count = (e - s) // st + 1
+        if count == 1:
+            ns, ne, nst = runs[i + 1]
+            if s + nst == ns:
+                runs[i + 1] = (s, ne, nst)
+                del runs[i]
+        i -= 1
+
+    # Prefer contiguous (step=1) runs: if a run's last element is exactly
+    # next_run.start - 1, peel it off to extend the following step=1 run.
+    i = len(runs) - 2
+    while i >= 0:
+        s, e, st = runs[i]
+        count = (e - s) // st + 1
+        ns, ne, nst = runs[i + 1]
+        if nst == 1 and count > 1 and e + 1 == ns:
+            # Peel last element: shorten this run, expand the next
+            runs[i] = (s, e - st, st)
+            runs[i + 1] = (e, ne, 1)
+        i -= 1
+
+    # 3. Format each run
+    def _fmt_run(start: int, end: int, step: int) -> str:
+        count = (end - start) // step + 1
+        if step == 1:
+            if count == 1:
+                return str(start)
+            return f"{start}-{end}"
+        # step > 1
+        if count <= 6:
+            return ",".join(str(start + step * j) for j in range(count))
+        return f"{start},{start + step},...,{end - step},{end}"
+
+    parts = [_fmt_run(s, e, st) for s, e, st in runs]
+
+    # 4. If single run, return directly; if short, join; if long, abbreviate
+    if len(parts) == 1:
+        return parts[0]
+    joined = ",".join(parts)
+    return joined
 
 
 def _find_numeric_segments(name: str) -> List[int]:
@@ -235,40 +366,30 @@ def _compress_weights(
         merged: List[Tuple[str, Tuple, int, str, str, str]] = []
         for (prefix, suffix), entries in groups.items():
             entries.sort(key=lambda x: x[0])
-            first_shape, first_dtype, first_note = (
-                entries[0][1],
-                entries[0][3],
-                entries[0][5],
-            )
-            uniform = all(
-                s == first_shape and d == first_dtype and n == first_note
-                for _, s, _, d, _, n in entries
-            )
-            if uniform:
-                indices = [x[0] for x in entries]
-                range_str = (
-                    str(indices[0])
-                    if len(indices) == 1
-                    else f"{indices[0]}-{indices[-1]}"
-                )
+            # Sub-group by (shape, dtype, note) so alternating patterns merge
+            sig_groups: Dict[Tuple, List] = {}
+            for e in entries:
+                sig = (e[1], e[3], e[5])  # (shape, dtype, note)
+                sig_groups.setdefault(sig, []).append(e)
+
+            for (shape, dtype, note), sub_entries in sig_groups.items():
+                if len(sub_entries) == 1:
+                    idx, sh, numel, dt, fname, nt = sub_entries[0]
+                    merged.append((f"{prefix}{idx}{suffix}", sh, numel, dt, fname, nt))
+                    continue
+                indices = [x[0] for x in sub_entries]
+                range_str = _format_indices(indices)
                 merged_name = f"{prefix}{range_str}{suffix}"
-                single_numel = entries[0][2]
+                single_numel = sub_entries[0][2]
                 total_numel = single_numel * len(indices)
-                # Derive label from the segment name before the numeric index
                 segs = merged_name.split(".")
                 label = segs[pos - 1] if pos > 0 else "items"
-                note = f"×{len(indices)} {label}"
-                if first_note:
-                    note = f"{note}, {first_note}"
-                fnames = {x[4] for x in entries}
-                fname = "Multi Files" if len(fnames) > 1 else entries[0][4]
-                merged.append(
-                    (merged_name, first_shape, total_numel, first_dtype, fname, note)
-                )
-            else:
-                for idx, shape, numel, dtype, fname, note in entries:
-                    orig_name = f"{prefix}{idx}{suffix}"
-                    merged.append((orig_name, shape, numel, dtype, fname, note))
+                new_note = f"×{len(indices)} {label}"
+                if note:
+                    new_note = f"{new_note}, {note}"
+                fnames = {x[4] for x in sub_entries}
+                fname = "Multi Files" if len(fnames) > 1 else sub_entries[0][4]
+                merged.append((merged_name, shape, total_numel, dtype, fname, new_note))
 
         items = ungrouped + merged
         items.sort(key=lambda x: natural_sort_key(x[0]))
@@ -279,16 +400,34 @@ def _compress_weights(
 def _read_safetensor_file(
     filepath: str,
 ) -> List[Tuple[str, Tuple[int, ...], int, str, str]]:
-    """读取单个 safetensors 文件，返回权重信息列表。"""
-    from safetensors import safe_open
+    """读取单个 safetensors 文件的元数据（不加载张量数据），返回权重信息列表。
+
+    仅解析文件头部的 JSON 元数据，避免将完整张量加载到内存，
+    适用于大模型并发读取场景，不会因 OOM 导致进程被杀。
+    """
+    import json
+    import struct
 
     fname = os.path.basename(filepath)
     results = []
-    with safe_open(filepath, "pt", "cpu") as f:
-        for name in f.keys():
-            tensor = f.get_tensor(name)
-            numel = tensor.numel()
-            results.append((name, tuple(tensor.shape), numel, str(tensor.dtype), fname))
+
+    with open(filepath, "rb") as f:
+        # safetensors 格式: 前8字节为 header 长度(little-endian uint64),
+        # 随后是 JSON 格式的元数据, 包含每个张量的 dtype/shape/data_offsets
+        header_size = struct.unpack("<Q", f.read(8))[0]
+        header = json.loads(f.read(header_size))
+
+    for name, meta in header.items():
+        if name == "__metadata__":
+            continue
+        st_dtype = meta["dtype"]
+        dtype_str = _ST_DTYPE_INFO.get(st_dtype, (st_dtype,))[0]
+        shape = tuple(meta["shape"])
+        numel = 1
+        for s in shape:
+            numel *= s
+        results.append((name, shape, numel, dtype_str, fname))
+
     return results
 
 
@@ -309,7 +448,7 @@ def _read_bin_file(
 
 
 def inspect_weights(
-    model_path: str, out, compress: bool = True, num_workers: int = 16
+    model_path: str, out, compress: bool = True, num_workers: int = 4
 ) -> None:
     import torch
 
@@ -358,6 +497,7 @@ def inspect_weights(
             except Exception as e:
                 logger.warning("读取 %s 失败: %s", fname, e)
                 pbar.update(1)
+                continue
             all_weights.extend(results)
             total_params += sum(r[2] for r in results)
             pbar.update(1)
@@ -370,23 +510,23 @@ def inspect_weights(
     # 输出统计
     total_file_size = sum(os.path.getsize(fp) for fp in weight_files)
 
-    def _resolve_dtype(dtype):
-        if isinstance(dtype, torch.dtype):
-            return dtype
-        return getattr(torch, dtype.replace("torch.", ""))
+    def _element_size(dtype):
+        if isinstance(dtype, str) and dtype in _ST_DTYPE_INFO:
+            return _ST_DTYPE_INFO[dtype][1]
+        if isinstance(dtype, str) and dtype.startswith("torch."):
+            dtype = getattr(torch, dtype.replace("torch.", ""))
+        return (
+            torch.finfo(dtype).bits // 8
+            if dtype.is_floating_point
+            else torch.iinfo(dtype).bits // 8
+        )
 
-    total_tensor_size = sum(
-        numel
-        * (
-            torch.finfo(d).bits // 8
-            if d.is_floating_point
-            else torch.iinfo(d).bits // 8
-        )
-        for _, _, numel, d in (
-            (_name, _sh, _ne, _resolve_dtype(_dt))
-            for _name, _sh, _ne, _dt, _ in all_weights
-        )
-    )
+    _es_cache: Dict[str, int] = {}
+    total_tensor_size = 0
+    for _, _, numel, dt, _ in all_weights:
+        if dt not in _es_cache:
+            _es_cache[dt] = _element_size(dt)
+        total_tensor_size += numel * _es_cache[dt]
 
     print("# 权重统计\n", file=out)
     print(f"- **权重文件**: {len(weight_files)} 个 `{file_type}` 文件", file=out)
@@ -443,7 +583,7 @@ def main():
     parser.add_argument(
         "--num-workers",
         type=int,
-        default=16,
+        default=4,
         help="并发读取权重文件的进程数（默认 8）",
     )
     args = parser.parse_args()

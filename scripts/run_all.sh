@@ -7,7 +7,7 @@ models=(
   "/nfs/ofs-llm-ssd/models/opensource/DeepSeek-R1-Distill-Qwen-7B"
   "/nfs/ofs-llm-ssd/models/opensource/DeepSeek-V3.1"
   "/nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-V3.2"
-  "/nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-V4-Flash"
+  "/nfs/ofs-llm-ssd/models/opensource/DeepSeek-V4-Flash"
   "/nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-V4-Pro"
   "/nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-OCR"
 
@@ -68,15 +68,19 @@ models=(
 
 export HF_TRUST_REMOTE_CODE=True
 
-# 依次遍历模型
-for model_path in "${models[@]}"; do
+# 并发数（可按 CPU/内存 调整）
+MAX_WORKERS=${MAX_WORKERS:-16}
+
+run_one() {
+  local model_path="$1"
   echo "========================================"
   echo "Processing model: ${model_path}"
   echo "========================================"
-
-  python3 model_inspector.py --num-workers 32 --model-path "${model_path}"
-
+  python3 model_inspector.py -f --num-workers 1 --model-path "${model_path}"
   echo
-done
+}
+export -f run_one
+
+printf '%s\n' "${models[@]}" | xargs -P "${MAX_WORKERS}" -I {} bash -c 'run_one "$@"' _ {}
 
 echo "All models processed."

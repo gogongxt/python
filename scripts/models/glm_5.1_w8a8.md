@@ -4,6 +4,76 @@
 
 # 模型配置
 
+<details><summary>原始 config.json</summary>
+
+`/nfs/ofs-llm-ssd/models/opensource/GLM-5.1-w8a8/config.json`
+
+```json
+
+{
+  "architectures": [
+    "GlmMoeDsaForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "dtype": "bfloat16",
+  "eos_token_id": [
+    154820,
+    154827,
+    154829
+  ],
+  "ep_size": 1,
+  "first_k_dense_replace": 3,
+  "hidden_act": "silu",
+  "head_dim": 64,
+  "hidden_size": 6144,
+  "index_head_dim": 128,
+  "index_n_heads": 32,
+  "index_topk": 2048,
+  "indexer_rope_interleave": true,
+  "initializer_range": 0.02,
+  "intermediate_size": 12288,
+  "kv_lora_rank": 512,
+  "max_position_embeddings": 202752,
+  "moe_intermediate_size": 2048,
+  "moe_layer_freq": 1,
+  "model_type": "glm_moe_dsa",
+  "n_group": 1,
+  "n_routed_experts": 256,
+  "n_shared_experts": 1,
+  "norm_topk_prob": true,
+  "num_attention_heads": 64,
+  "num_experts_per_tok": 8,
+  "num_hidden_layers": 78,
+  "num_key_value_heads": 64,
+  "num_nextn_predict_layers": 1,
+  "pad_token_id": 154820,
+  "pretraining_tp": 1,
+  "q_lora_rank": 2048,
+  "qk_head_dim": 256,
+  "qk_nope_head_dim": 192,
+  "qk_rope_head_dim": 64,
+  "rms_norm_eps": 1e-05,
+  "rope_interleave": true,
+  "rope_parameters": {
+    "rope_theta": 1000000,
+    "rope_type": "default"
+  },
+  "routed_scaling_factor": 2.5,
+  "scoring_func": "sigmoid",
+  "tie_word_embeddings": false,
+  "topk_group": 1,
+  "topk_method": "noaux_tc",
+  "transformers_version": "5.4.0",
+  "use_cache": true,
+  "v_head_dim": 256,
+  "vocab_size": 154880
+}
+```
+</details>
+
+<details><summary>Transformers 配置</summary>
+
 - **模型类型**: `GlmMoeDsaConfig`
 - **数据类型**: `torch.bfloat16`
 - **隐藏层大小**: 6144
@@ -11,8 +81,6 @@
 - **注意力头数**: 64
 - **词表大小**: 154880
 - **中间层大小**: 12288
-
-<details><summary>完整配置</summary>
 
 ```
 GlmMoeDsaConfig {
@@ -387,12 +455,12 @@ GlmMoeDsaModel(
 | `model.layers.3-78.mlp.shared_experts.up_proj.weight` (×76 layers) | `[2048, 6144]` | `torch.int8` | 912.00 MB | Multi Files |
 | `model.layers.3-78.mlp.shared_experts.up_proj.weight_offset` (×76 layers) | `[2048, 1]` | `torch.float32` | 608.00 KB | Multi Files |
 | `model.layers.3-78.mlp.shared_experts.up_proj.weight_scale` (×76 layers) | `[2048, 1]` | `torch.float32` | 608.00 KB | Multi Files |
-| `model.layers.78.eh_proj.weight` (×1 layers) | `[6144, 12288]` | `torch.bfloat16` | 144.00 MB | quant_model_weights-00177-of-00179.safetensors |
-| `model.layers.78.embed_tokens.weight` (×1 layers) | `[154880, 6144]` | `torch.bfloat16` | 1.77 GB | quant_model_weights-00177-of-00179.safetensors |
-| `model.layers.78.enorm.weight` (×1 layers) | `[6144]` | `torch.bfloat16` | 12.00 KB | quant_model_weights-00177-of-00179.safetensors |
-| `model.layers.78.hnorm.weight` (×1 layers) | `[6144]` | `torch.bfloat16` | 12.00 KB | quant_model_weights-00177-of-00179.safetensors |
-| `model.layers.78.shared_head.head.weight` (×1 layers) | `[154880, 6144]` | `torch.bfloat16` | 1.77 GB | quant_model_weights-00177-of-00179.safetensors |
-| `model.layers.78.shared_head.norm.weight` (×1 layers) | `[6144]` | `torch.bfloat16` | 12.00 KB | quant_model_weights-00177-of-00179.safetensors |
+| `model.layers.78.eh_proj.weight` | `[6144, 12288]` | `torch.bfloat16` | 144.00 MB | quant_model_weights-00177-of-00179.safetensors |
+| `model.layers.78.embed_tokens.weight` | `[154880, 6144]` | `torch.bfloat16` | 1.77 GB | quant_model_weights-00177-of-00179.safetensors |
+| `model.layers.78.enorm.weight` | `[6144]` | `torch.bfloat16` | 12.00 KB | quant_model_weights-00177-of-00179.safetensors |
+| `model.layers.78.hnorm.weight` | `[6144]` | `torch.bfloat16` | 12.00 KB | quant_model_weights-00177-of-00179.safetensors |
+| `model.layers.78.shared_head.head.weight` | `[154880, 6144]` | `torch.bfloat16` | 1.77 GB | quant_model_weights-00177-of-00179.safetensors |
+| `model.layers.78.shared_head.norm.weight` | `[6144]` | `torch.bfloat16` | 12.00 KB | quant_model_weights-00177-of-00179.safetensors |
 | `model.norm.weight` | `[6144]` | `torch.float32` | 24.00 KB | quant_model_weights-00178-of-00179.safetensors |
 | `rot.weight` | `[6144, 6144]` | `torch.bfloat16` | 72.00 MB | rot.safetensors |
 

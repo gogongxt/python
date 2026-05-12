@@ -4,6 +4,86 @@
 
 # 模型配置
 
+<details><summary>原始 config.json</summary>
+
+`/nfs/ofs-llab-cold/model/moonshotai/Kimi-K2-Instruct/config.json`
+
+```json
+
+{
+  "architectures": [
+    "DeepseekV3ForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "auto_map": {
+    "AutoConfig": "configuration_deepseek.DeepseekV3Config",
+    "AutoModel": "modeling_deepseek.DeepseekV3Model",
+    "AutoModelForCausalLM": "modeling_deepseek.DeepseekV3ForCausalLM"
+  },
+  "aux_loss_alpha": 0.001,
+  "bos_token_id": 163584,
+  "eos_token_id": 163585,
+  "first_k_dense_replace": 1,
+  "hidden_act": "silu",
+  "hidden_size": 7168,
+  "initializer_range": 0.02,
+  "intermediate_size": 18432,
+  "kv_lora_rank": 512,
+  "max_position_embeddings": 131072,
+  "model_type": "kimi_k2",
+  "moe_intermediate_size": 2048,
+  "moe_layer_freq": 1,
+  "n_group": 1,
+  "n_routed_experts": 384,
+  "n_shared_experts": 1,
+  "norm_topk_prob": true,
+  "num_attention_heads": 64,
+  "num_experts_per_tok": 8,
+  "num_hidden_layers": 61,
+  "num_key_value_heads": 64,
+  "num_nextn_predict_layers": 0,
+  "pretraining_tp": 1,
+  "q_lora_rank": 1536,
+  "qk_nope_head_dim": 128,
+  "qk_rope_head_dim": 64,
+  "quantization_config": {
+    "activation_scheme": "dynamic",
+    "fmt": "e4m3",
+    "quant_method": "fp8",
+    "weight_block_size": [
+      128,
+      128
+    ]
+  },
+  "rms_norm_eps": 1e-06,
+  "rope_theta": 50000.0,
+  "routed_scaling_factor": 2.827,
+  "rope_scaling": {
+    "beta_fast": 1.0,
+    "beta_slow": 1.0,
+    "factor": 32.0,
+    "mscale": 1.0,
+    "mscale_all_dim": 1.0,
+    "original_max_position_embeddings": 4096,
+    "type": "yarn"
+  },
+  "scoring_func": "sigmoid",
+  "seq_aux": true,
+  "tie_word_embeddings": false,
+  "topk_group": 1,
+  "topk_method": "noaux_tc",
+  "torch_dtype": "bfloat16",
+  "transformers_version": "4.48.3",
+  "use_cache": true,
+  "v_head_dim": 128,
+  "vocab_size": 163840
+}
+```
+</details>
+
+<details><summary>Transformers 配置</summary>
+
 - **模型类型**: `DeepseekV3Config`
 - **数据类型**: `torch.bfloat16`
 - **隐藏层大小**: 7168
@@ -11,8 +91,6 @@
 - **注意力头数**: 64
 - **词表大小**: 163840
 - **中间层大小**: 18432
-
-<details><summary>完整配置</summary>
 
 ```
 DeepseekV3Config {
@@ -95,7 +173,7 @@ DeepseekV3Config {
 
 # 模型结构
 
-**错误**: 解析模型结构失败 - `'DeepseekV3Config' object has no attribute 'qk_head_dim'`
+**模型类**: `DeepseekV3Config` (当前 transformers 版本不支持实例化)
 
 # 权重统计
 
@@ -127,12 +205,12 @@ DeepseekV3Config {
 | `model.layers.0-60.self_attn.q_b_proj.weight` (×61 layers) | `[12288, 1536]` | `torch.float8_e4m3fn` | 1.07 GB | Multi Files |
 | `model.layers.0-60.self_attn.q_b_proj.weight_scale_inv` (×61 layers) | `[96, 12]` | `torch.float32` | 274.50 KB | Multi Files |
 | `model.layers.0-60.self_attn.rotary_emb.inv_freq` (×61 layers) | `[56]` | `torch.bfloat16` | 6.67 KB | Multi Files |
-| `model.layers.0.mlp.down_proj.weight` (×1 layers) | `[7168, 18432]` | `torch.float8_e4m3fn` | 126.00 MB | model-1-of-61.safetensors |
-| `model.layers.0.mlp.down_proj.weight_scale_inv` (×1 layers) | `[56, 144]` | `torch.float32` | 31.50 KB | model-1-of-61.safetensors |
-| `model.layers.0.mlp.gate_proj.weight` (×1 layers) | `[18432, 7168]` | `torch.float8_e4m3fn` | 126.00 MB | model-1-of-61.safetensors |
-| `model.layers.0.mlp.gate_proj.weight_scale_inv` (×1 layers) | `[144, 56]` | `torch.float32` | 31.50 KB | model-1-of-61.safetensors |
-| `model.layers.0.mlp.up_proj.weight` (×1 layers) | `[18432, 7168]` | `torch.float8_e4m3fn` | 126.00 MB | model-1-of-61.safetensors |
-| `model.layers.0.mlp.up_proj.weight_scale_inv` (×1 layers) | `[144, 56]` | `torch.float32` | 31.50 KB | model-1-of-61.safetensors |
+| `model.layers.0.mlp.down_proj.weight` | `[7168, 18432]` | `torch.float8_e4m3fn` | 126.00 MB | model-1-of-61.safetensors |
+| `model.layers.0.mlp.down_proj.weight_scale_inv` | `[56, 144]` | `torch.float32` | 31.50 KB | model-1-of-61.safetensors |
+| `model.layers.0.mlp.gate_proj.weight` | `[18432, 7168]` | `torch.float8_e4m3fn` | 126.00 MB | model-1-of-61.safetensors |
+| `model.layers.0.mlp.gate_proj.weight_scale_inv` | `[144, 56]` | `torch.float32` | 31.50 KB | model-1-of-61.safetensors |
+| `model.layers.0.mlp.up_proj.weight` | `[18432, 7168]` | `torch.float8_e4m3fn` | 126.00 MB | model-1-of-61.safetensors |
+| `model.layers.0.mlp.up_proj.weight_scale_inv` | `[144, 56]` | `torch.float32` | 31.50 KB | model-1-of-61.safetensors |
 | `model.layers.1-60.mlp.experts.0-383.down_proj.weight` (×60 layers, ×384 experts) | `[7168, 2048]` | `torch.float8_e4m3fn` | 315.00 GB | Multi Files |
 | `model.layers.1-60.mlp.experts.0-383.down_proj.weight_scale_inv` (×60 layers, ×384 experts) | `[56, 16]` | `torch.float32` | 78.75 MB | Multi Files |
 | `model.layers.1-60.mlp.experts.0-383.gate_proj.weight` (×60 layers, ×384 experts) | `[2048, 7168]` | `torch.float8_e4m3fn` | 315.00 GB | Multi Files |

@@ -4,6 +4,63 @@
 
 # 模型配置
 
+<details><summary>原始 config.json</summary>
+
+`/nfs/ofs-llm-ssd/models/opensource/GLM-4.7-Flash/config.json`
+
+```json
+
+{
+  "architectures": [
+    "Glm4MoeLiteForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "pad_token_id": 154820,
+  "eos_token_id": [
+    154820,
+    154827,
+    154829
+  ],
+  "hidden_act": "silu",
+  "hidden_size": 2048,
+  "intermediate_size": 10240,
+  "max_position_embeddings": 202752,
+  "model_type": "glm4_moe_lite",
+  "moe_intermediate_size": 1536,
+  "topk_method": "noaux_tc",
+  "norm_topk_prob": true,
+  "num_attention_heads": 20,
+  "n_group": 1,
+  "topk_group": 1,
+  "n_routed_experts": 64,
+  "n_shared_experts": 1,
+  "routed_scaling_factor": 1.8,
+  "num_experts_per_tok": 4,
+  "first_k_dense_replace": 1,
+  "num_hidden_layers": 47,
+  "num_key_value_heads": 20,
+  "num_nextn_predict_layers": 1,
+  "partial_rotary_factor": 1.0,
+  "rms_norm_eps": 1e-05,
+  "rope_scaling": null,
+  "rope_theta": 1000000,
+  "tie_word_embeddings": false,
+  "dtype": "bfloat16",
+  "transformers_version": "5.0.0rc0",
+  "q_lora_rank": 768,
+  "kv_lora_rank": 512,
+  "qk_nope_head_dim": 192,
+  "qk_rope_head_dim": 64,
+  "v_head_dim": 256,
+  "vocab_size": 154880
+}
+
+```
+</details>
+
+<details><summary>Transformers 配置</summary>
+
 - **模型类型**: `Glm4MoeLiteConfig`
 - **数据类型**: `torch.bfloat16`
 - **隐藏层大小**: 2048
@@ -11,8 +68,6 @@
 - **注意力头数**: 20
 - **词表大小**: 154880
 - **中间层大小**: 10240
-
-<details><summary>完整配置</summary>
 
 ```
 Glm4MoeLiteConfig {
@@ -205,9 +260,9 @@ Glm4MoeLiteModel(
 | `model.layers.0-47.self_attn.q_a_layernorm.weight` (×48 layers) | `[768]` | `torch.bfloat16` | 72.00 KB | Multi Files |
 | `model.layers.0-47.self_attn.q_a_proj.weight` (×48 layers) | `[768, 2048]` | `torch.bfloat16` | 144.00 MB | Multi Files |
 | `model.layers.0-47.self_attn.q_b_proj.weight` (×48 layers) | `[5120, 768]` | `torch.bfloat16` | 360.00 MB | Multi Files |
-| `model.layers.0.mlp.down_proj.weight` (×1 layers) | `[2048, 10240]` | `torch.bfloat16` | 40.00 MB | model-00001-of-00048.safetensors |
-| `model.layers.0.mlp.gate_proj.weight` (×1 layers) | `[10240, 2048]` | `torch.bfloat16` | 40.00 MB | model-00001-of-00048.safetensors |
-| `model.layers.0.mlp.up_proj.weight` (×1 layers) | `[10240, 2048]` | `torch.bfloat16` | 40.00 MB | model-00001-of-00048.safetensors |
+| `model.layers.0.mlp.down_proj.weight` | `[2048, 10240]` | `torch.bfloat16` | 40.00 MB | model-00001-of-00048.safetensors |
+| `model.layers.0.mlp.gate_proj.weight` | `[10240, 2048]` | `torch.bfloat16` | 40.00 MB | model-00001-of-00048.safetensors |
+| `model.layers.0.mlp.up_proj.weight` | `[10240, 2048]` | `torch.bfloat16` | 40.00 MB | model-00001-of-00048.safetensors |
 | `model.layers.1-47.mlp.experts.0-63.down_proj.weight` (×47 layers, ×64 experts) | `[2048, 1536]` | `torch.bfloat16` | 17.62 GB | Multi Files |
 | `model.layers.1-47.mlp.experts.0-63.gate_proj.weight` (×47 layers, ×64 experts) | `[1536, 2048]` | `torch.bfloat16` | 17.62 GB | Multi Files |
 | `model.layers.1-47.mlp.experts.0-63.up_proj.weight` (×47 layers, ×64 experts) | `[1536, 2048]` | `torch.bfloat16` | 17.62 GB | Multi Files |
@@ -216,12 +271,12 @@ Glm4MoeLiteModel(
 | `model.layers.1-47.mlp.shared_experts.down_proj.weight` (×47 layers) | `[2048, 1536]` | `torch.bfloat16` | 282.00 MB | Multi Files |
 | `model.layers.1-47.mlp.shared_experts.gate_proj.weight` (×47 layers) | `[1536, 2048]` | `torch.bfloat16` | 282.00 MB | Multi Files |
 | `model.layers.1-47.mlp.shared_experts.up_proj.weight` (×47 layers) | `[1536, 2048]` | `torch.bfloat16` | 282.00 MB | Multi Files |
-| `model.layers.47.eh_proj.weight` (×1 layers) | `[2048, 4096]` | `torch.bfloat16` | 16.00 MB | model-00048-of-00048.safetensors |
-| `model.layers.47.embed_tokens.weight` (×1 layers) | `[154880, 2048]` | `torch.bfloat16` | 605.00 MB | model-00001-of-00048.safetensors |
-| `model.layers.47.enorm.weight` (×1 layers) | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00048-of-00048.safetensors |
-| `model.layers.47.hnorm.weight` (×1 layers) | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00048-of-00048.safetensors |
-| `model.layers.47.shared_head.head.weight` (×1 layers) | `[154880, 2048]` | `torch.bfloat16` | 605.00 MB | model-00047-of-00048.safetensors |
-| `model.layers.47.shared_head.norm.weight` (×1 layers) | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00048-of-00048.safetensors |
+| `model.layers.47.eh_proj.weight` | `[2048, 4096]` | `torch.bfloat16` | 16.00 MB | model-00048-of-00048.safetensors |
+| `model.layers.47.embed_tokens.weight` | `[154880, 2048]` | `torch.bfloat16` | 605.00 MB | model-00001-of-00048.safetensors |
+| `model.layers.47.enorm.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00048-of-00048.safetensors |
+| `model.layers.47.hnorm.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00048-of-00048.safetensors |
+| `model.layers.47.shared_head.head.weight` | `[154880, 2048]` | `torch.bfloat16` | 605.00 MB | model-00047-of-00048.safetensors |
+| `model.layers.47.shared_head.norm.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00048-of-00048.safetensors |
 | `model.norm.weight` | `[2048]` | `torch.bfloat16` | 4.00 KB | model-00047-of-00048.safetensors |
 
 </details>

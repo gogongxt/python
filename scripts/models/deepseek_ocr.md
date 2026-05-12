@@ -4,10 +4,6 @@
 
 # 模型配置
 
-- **错误**: 读取模型配置失败 - `The repository /nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-OCR contains custom code which must be executed to correctly load the model. You can inspect the repository content at /nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-OCR .
- You can inspect the repository content at https://hf.co//nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-OCR.
-Please pass the argument `trust_remote_code=True` to allow custom code to be run.`
-
 <details><summary>原始 config.json</summary>
 
 `/nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-OCR/config.json`
@@ -135,11 +131,15 @@ Please pass the argument `trust_remote_code=True` to allow custom code to be run
 ```
 </details>
 
+<details><summary>Transformers 配置</summary>
+
+**错误**: Transformers 解析配置失败 - `This modeling file requires the following packages that were not found in your environment: addict, matplotlib. Run `pip install addict matplotlib``
+
+</details>
+
 # 模型结构
 
-**错误**: 解析模型结构失败 - `The repository /nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-OCR contains custom code which must be executed to correctly load the model. You can inspect the repository content at /nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-OCR .
- You can inspect the repository content at https://hf.co//nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-OCR.
-Please pass the argument `trust_remote_code=True` to allow custom code to be run.`
+**错误**: 解析模型结构失败
 
 # 权重统计
 
@@ -148,7 +148,7 @@ Please pass the argument `trust_remote_code=True` to allow custom code to be run
 - **权重张量数**: 2,710
 - **参数总量**: 3,336,106,240
 - **张量累计大小**: 6.21 GB
-- **压缩**: 2710 → 86 行
+- **压缩**: 2710 → 65 行
 
 <details><summary>详细权重列表</summary>
 
@@ -163,9 +163,9 @@ Please pass the argument `trust_remote_code=True` to allow custom code to be run
 | `model.layers.0-11.self_attn.o_proj.weight` (×12 layers) | `[1280, 1280]` | `torch.bfloat16` | 37.50 MB | model-00001-of-000001.safetensors |
 | `model.layers.0-11.self_attn.q_proj.weight` (×12 layers) | `[1280, 1280]` | `torch.bfloat16` | 37.50 MB | model-00001-of-000001.safetensors |
 | `model.layers.0-11.self_attn.v_proj.weight` (×12 layers) | `[1280, 1280]` | `torch.bfloat16` | 37.50 MB | model-00001-of-000001.safetensors |
-| `model.layers.0.mlp.down_proj.weight` (×1 layers) | `[1280, 6848]` | `torch.bfloat16` | 16.72 MB | model-00001-of-000001.safetensors |
-| `model.layers.0.mlp.gate_proj.weight` (×1 layers) | `[6848, 1280]` | `torch.bfloat16` | 16.72 MB | model-00001-of-000001.safetensors |
-| `model.layers.0.mlp.up_proj.weight` (×1 layers) | `[6848, 1280]` | `torch.bfloat16` | 16.72 MB | model-00001-of-000001.safetensors |
+| `model.layers.0.mlp.down_proj.weight` | `[1280, 6848]` | `torch.bfloat16` | 16.72 MB | model-00001-of-000001.safetensors |
+| `model.layers.0.mlp.gate_proj.weight` | `[6848, 1280]` | `torch.bfloat16` | 16.72 MB | model-00001-of-000001.safetensors |
+| `model.layers.0.mlp.up_proj.weight` | `[6848, 1280]` | `torch.bfloat16` | 16.72 MB | model-00001-of-000001.safetensors |
 | `model.layers.1-11.mlp.experts.0-63.down_proj.weight` (×11 layers, ×64 experts) | `[1280, 896]` | `torch.bfloat16` | 1.50 GB | model-00001-of-000001.safetensors |
 | `model.layers.1-11.mlp.experts.0-63.gate_proj.weight` (×11 layers, ×64 experts) | `[896, 1280]` | `torch.bfloat16` | 1.50 GB | model-00001-of-000001.safetensors |
 | `model.layers.1-11.mlp.experts.0-63.up_proj.weight` (×11 layers, ×64 experts) | `[896, 1280]` | `torch.bfloat16` | 1.50 GB | model-00001-of-000001.safetensors |
@@ -176,6 +176,8 @@ Please pass the argument `trust_remote_code=True` to allow custom code to be run
 | `model.norm.weight` | `[1280]` | `torch.bfloat16` | 2.50 KB | model-00001-of-000001.safetensors |
 | `model.projector.layers.bias` | `[1280]` | `torch.bfloat16` | 2.50 KB | model-00001-of-000001.safetensors |
 | `model.projector.layers.weight` | `[1280, 2048]` | `torch.bfloat16` | 5.00 MB | model-00001-of-000001.safetensors |
+| `model.sam_model.blocks.0-1,3,4,6,7,9-10.attn.rel_pos_h` (×8 blocks) | `[27, 64]` | `torch.bfloat16` | 27.00 KB | model-00001-of-000001.safetensors |
+| `model.sam_model.blocks.0-1,3,4,6,7,9-10.attn.rel_pos_w` (×8 blocks) | `[27, 64]` | `torch.bfloat16` | 27.00 KB | model-00001-of-000001.safetensors |
 | `model.sam_model.blocks.0-11.attn.proj.bias` (×12 blocks) | `[768]` | `torch.bfloat16` | 18.00 KB | model-00001-of-000001.safetensors |
 | `model.sam_model.blocks.0-11.attn.proj.weight` (×12 blocks) | `[768, 768]` | `torch.bfloat16` | 13.50 MB | model-00001-of-000001.safetensors |
 | `model.sam_model.blocks.0-11.attn.qkv.bias` (×12 blocks) | `[2304]` | `torch.bfloat16` | 54.00 KB | model-00001-of-000001.safetensors |
@@ -188,35 +190,12 @@ Please pass the argument `trust_remote_code=True` to allow custom code to be run
 | `model.sam_model.blocks.0-11.norm1.weight` (×12 blocks) | `[768]` | `torch.bfloat16` | 18.00 KB | model-00001-of-000001.safetensors |
 | `model.sam_model.blocks.0-11.norm2.bias` (×12 blocks) | `[768]` | `torch.bfloat16` | 18.00 KB | model-00001-of-000001.safetensors |
 | `model.sam_model.blocks.0-11.norm2.weight` (×12 blocks) | `[768]` | `torch.bfloat16` | 18.00 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.0.attn.rel_pos_h` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.0.attn.rel_pos_w` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.1.attn.rel_pos_h` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.1.attn.rel_pos_w` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.2.attn.rel_pos_h` | `[127, 64]` | `torch.bfloat16` | 15.88 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.2.attn.rel_pos_w` | `[127, 64]` | `torch.bfloat16` | 15.88 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.3.attn.rel_pos_h` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.3.attn.rel_pos_w` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.4.attn.rel_pos_h` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.4.attn.rel_pos_w` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.5.attn.rel_pos_h` | `[127, 64]` | `torch.bfloat16` | 15.88 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.5.attn.rel_pos_w` | `[127, 64]` | `torch.bfloat16` | 15.88 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.6.attn.rel_pos_h` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.6.attn.rel_pos_w` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.7.attn.rel_pos_h` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.7.attn.rel_pos_w` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.8.attn.rel_pos_h` | `[127, 64]` | `torch.bfloat16` | 15.88 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.8.attn.rel_pos_w` | `[127, 64]` | `torch.bfloat16` | 15.88 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.9.attn.rel_pos_h` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.9.attn.rel_pos_w` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.10.attn.rel_pos_h` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.10.attn.rel_pos_w` | `[27, 64]` | `torch.bfloat16` | 3.38 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.11.attn.rel_pos_h` | `[127, 64]` | `torch.bfloat16` | 15.88 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.blocks.11.attn.rel_pos_w` | `[127, 64]` | `torch.bfloat16` | 15.88 KB | model-00001-of-000001.safetensors |
+| `model.sam_model.blocks.2,5,8,11.attn.rel_pos_h` (×4 blocks) | `[127, 64]` | `torch.bfloat16` | 63.50 KB | model-00001-of-000001.safetensors |
+| `model.sam_model.blocks.2,5,8,11.attn.rel_pos_w` (×4 blocks) | `[127, 64]` | `torch.bfloat16` | 63.50 KB | model-00001-of-000001.safetensors |
 | `model.sam_model.neck.0.weight` | `[256, 768, 1, 1]` | `torch.bfloat16` | 384.00 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.neck.1-3.bias` (×2 neck) | `[256]` | `torch.bfloat16` | 1.00 KB | model-00001-of-000001.safetensors |
-| `model.sam_model.neck.1.weight` | `[256]` | `torch.bfloat16` | 512.00 B | model-00001-of-000001.safetensors |
+| `model.sam_model.neck.1,3.bias` (×2 neck) | `[256]` | `torch.bfloat16` | 1.00 KB | model-00001-of-000001.safetensors |
+| `model.sam_model.neck.1,3.weight` (×2 neck) | `[256]` | `torch.bfloat16` | 1.00 KB | model-00001-of-000001.safetensors |
 | `model.sam_model.neck.2.weight` | `[256, 256, 3, 3]` | `torch.bfloat16` | 1.12 MB | model-00001-of-000001.safetensors |
-| `model.sam_model.neck.3.weight` | `[256]` | `torch.bfloat16` | 512.00 B | model-00001-of-000001.safetensors |
 | `model.sam_model.net_2.weight` | `[512, 256, 3, 3]` | `torch.bfloat16` | 2.25 MB | model-00001-of-000001.safetensors |
 | `model.sam_model.net_3.weight` | `[1024, 512, 3, 3]` | `torch.bfloat16` | 9.00 MB | model-00001-of-000001.safetensors |
 | `model.sam_model.patch_embed.proj.bias` | `[768]` | `torch.bfloat16` | 1.50 KB | model-00001-of-000001.safetensors |

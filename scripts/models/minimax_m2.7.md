@@ -4,6 +4,132 @@
 
 # 模型配置
 
+<details><summary>原始 config.json</summary>
+
+`/nfs/ofs-llm-ssd/models/opensource/MiniMax-M2.7/config.json`
+
+```json
+
+{
+  "architectures": [
+    "MiniMaxM2ForCausalLM"
+  ],
+  "attn_type_list": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "auto_map": {
+    "AutoConfig": "configuration_minimax_m2.MiniMaxM2Config",
+    "AutoModelForCausalLM": "modeling_minimax_m2.MiniMaxM2ForCausalLM"
+  },
+  "dtype": "bfloat16",
+  "head_dim": 128,
+  "hidden_act": "silu",
+  "hidden_size": 3072,
+  "intermediate_size": 1536,
+  "max_position_embeddings": 204800,
+  "model_type": "minimax_m2",
+  "mtp_transformer_layers": 1,
+  "num_attention_heads": 48,
+  "num_experts_per_tok": 8,
+  "num_hidden_layers": 62,
+  "num_key_value_heads": 8,
+  "num_local_experts": 256,
+  "num_mtp_modules": 3,
+  "qk_norm_type": "per_layer",
+  "quantization_config": {
+    "activation_scheme": "dynamic",
+    "fmt": "float8_e4m3fn",
+    "quant_method": "fp8",
+    "weight_block_size": [
+      128,
+      128
+    ],
+    "modules_to_not_convert": [
+      "gate",
+      "e_score_correction_bias",
+      "lm_head"
+    ]
+  },
+  "rms_norm_eps": 1e-06,
+  "rope_theta": 5000000,
+  "rotary_dim": 64,
+  "scoring_func": "sigmoid",
+  "shared_intermediate_size": 0,
+  "tie_word_embeddings": false,
+  "transformers_version": "4.46.1",
+  "use_cache": true,
+  "use_mtp": true,
+  "use_qk_norm": true,
+  "use_routing_bias": true,
+  "vocab_size": 200064
+}
+
+```
+</details>
+
+<details><summary>Transformers 配置</summary>
+
 - **模型类型**: `MiniMaxM2Config`
 - **数据类型**: `torch.bfloat16`
 - **隐藏层大小**: 3072
@@ -11,8 +137,6 @@
 - **注意力头数**: 48
 - **词表大小**: 200064
 - **中间层大小**: 1536
-
-<details><summary>完整配置</summary>
 
 ```
 MiniMaxM2Config {
@@ -88,9 +212,9 @@ MiniMaxM2Config {
     "AutoConfig": "configuration_minimax_m2.MiniMaxM2Config",
     "AutoModelForCausalLM": "modeling_minimax_m2.MiniMaxM2ForCausalLM"
   },
-  "bos_token_id": 200034,
+  "bos_token_id": 1,
   "dtype": "bfloat16",
-  "eos_token_id": 200020,
+  "eos_token_id": 2,
   "head_dim": 128,
   "hidden_act": "silu",
   "hidden_size": 3072,
@@ -107,6 +231,7 @@ MiniMaxM2Config {
   "num_mtp_modules": 3,
   "output_router_logits": false,
   "pad_token_id": null,
+  "partial_rotary_factor": 0.5,
   "qk_norm_type": "per_layer",
   "quantization_config": {
     "activation_scheme": "dynamic",
@@ -123,15 +248,13 @@ MiniMaxM2Config {
     ]
   },
   "rms_norm_eps": 1e-06,
-  "rope_parameters": {
-    "rope_theta": 5000000,
-    "rope_type": "default"
-  },
+  "rope_theta": 5000000,
   "rotary_dim": 64,
   "router_aux_loss_coef": 0.001,
   "router_jitter_noise": 0.0,
   "scoring_func": "sigmoid",
   "shared_intermediate_size": 0,
+  "sliding_window": null,
   "tie_word_embeddings": false,
   "transformers_version": "5.7.0",
   "use_cache": true,
