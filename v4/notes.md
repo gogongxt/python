@@ -21,7 +21,6 @@ DeepSeek-V4 发布了两个版本，flash和pro，都支持1M上下文，在架�
 
 1. 残差连接使用了mHC ([Manifold-Constrained Hyper-Connections](https://arxiv.org/abs/2512.24880))，实现上多了hc_pre和hc_post
 2. 使用三种混合Attention
-
    - `SWA` (Sliding Window Attention) 滑窗注意力
    - `CSA` (Compressed Sparse Attention) 压缩稀疏注意力，带index的压缩注意力，压缩比4:1
    - `HCA` (Heavily Compressed Attention) 重度压缩注意力，压缩比128:1
@@ -73,11 +72,9 @@ DeepSeek-V4 发布了两个版本，flash和pro，都支持1M上下文，在架�
 **重叠压缩（overlap）**：CSA的ratio=4时使用重叠压缩，每4个token一组，相邻组之间共享前一组最后ratio个token的信息。具体实现：wkv/wgate输出维度是2×head_dim，前半维度(前d)对应"与前一组重叠"的版本，后半维度(后d)对应"当前组正常"的版本。`overlap_transform`将前一组的[:d]拼接到当前组前面，形成2×ratio个候选，经softmax加权求和后得到1个压缩KV。压缩后KV数量仍然是 seq_len//ratio（与HCA相同），但信息更平滑
 
 1. **三种注意力是同一个公式**：Q 对一条拼接的 KV 序列做一次 softmax attention，不是两路独立再融合
-
    - KV 序列 = 滑窗原始KV + 压缩KV，位置连续排列
 
 2. **每个 Q 实际参与的 K/V 数量**：
-
    - SWA：128
    - CSA：128 + min(index_topk, 可用压缩数)
    - HCA：128 + seq_len // 128
@@ -88,26 +85,46 @@ DeepSeek-V4 发布了两个版本，flash和pro，都支持1M上下文，在架�
 
    对Pro来说CSA topk=1024（Flash=512），需要 ≥4096 token 才能选满，HCA则是序列有多长选择多长
 
-3. **attn_sink（注意力汇）**：每层有一个可学习的 `[n_heads]` 参数，在softmax分母中加入 `exp(attn_sink - scores_max)` 项。相当于一个虚拟的"吸收"token，防止当所有注意力分数都很低时注意力过度分散到不相关位置。这在稀疏注意力中尤为重要——当topk选出的KV位置都不太相关时，attn_sink提供了稳定的"默认"注意力去向
+## attn_sink（注意力汇）
+
+每层 attention 有一个可学习的 `attn_sink` 参数，形状为 `[n_heads]`（Flash=`[64]`，Pro=`[128]`），作用于 sparse attention 的 softmax 计算中。
+
+### 数学公式
+
+标准 sparse softmax attention 的输出为：
+
+$$o = \frac{\sum_{j \in \text{topk}} e^{s_j - s_{max}} \cdot v_j}{\sum_{j \in \text{topk}} e^{s_j - s_{max}}}$$
+
+加入 `attn_sink` 后，分母增加一项：
+
+$$o = \frac{\sum_{j \in \text{topk}} e^{s_j - s_{max}} \cdot v_j}{\sum_{j \in \text{topk}} e^{s_j - s_{max}} + e^{\text{attn\_sink}_h - s_{max}}}$$
+
+- **分子不变**：`attn_sink` 只出现在分母中，不参与 value 的加权求和
+- **分母增大**：每个 head 的注意力权重之和被压缩到 < 1，剩余权重被"sink"吸收
+- 对应 kernel 代码（`kernel.py:346`）：`sum_exp[i] += T.exp(attn_sink[i] - scores_max[i])`
+
+### 为什么需要它
+
+在稀疏注意力中尤为重要 — CSA 只看 top-k 个压缩 KV + 128 滑窗，如果这些位置恰好都不相关，没有 `attn_sink` 的话注意力会被迫均匀分散，产生噪声输出。有了它，模型可以选择"不看"，相当于给每个 head 一个"我不确定该看哪里"的逃生出口。
 
 ## MoE
 
 每一层的专家都是一个共享专家+路由专家(topk选6个)，对比deepseek-v3前三层是稠密ffn，后面58层是一个共享专家+256个路由专家(topk选8个)
 
-|              | Pro                     | Flash                   |
-| ------------ | ----------------------- | ----------------------- |
-| 路由专家数   | 384                     | 256                     |
-| topk         | 6                       | 6                       |
-| shared专家数 | 1                       | 1                       |
+|              | Pro | Flash |
+| ------------ | --- | ----- |
+| 路由专家数   | 384 | 256   |
+| topk         | 6   | 6     |
+| shared专家数 | 1   | 1     |
 
 路由专家的参数是fp4，实际在safetensor存储时由于没有4bit存储，是把两个参数打包成一个int8来存储的，详细的可以看文末的权重参数
 
-|                | Routed Experts       | Shared Experts       |
-| -------------- | -------------------- | -------------------- |
-| **weight**     | FP4 (int8 打包)      | FP8 (float8_e4m3fn)  |
-| **scale**      | FP8 (float8_e8m0fnu) | FP8 (float8_e8m0fnu) |
-| **block_size** | 32                   | 128                  |
-| **swiglu_limit** | 10.0 (up:±10, gate:≤10) | 无                 |
+|                  | Routed Experts          | Shared Experts       |
+| ---------------- | ----------------------- | -------------------- |
+| **weight**       | FP4 (int8 打包)         | FP8 (float8_e4m3fn)  |
+| **scale**        | FP8 (float8_e8m0fnu)    | FP8 (float8_e8m0fnu) |
+| **block_size**   | 32                      | 128                  |
+| **swiglu_limit** | 10.0 (up:±10, gate:≤10) | 无                   |
 
 前三层的topk是用hash map选择出来的，就是`[129280, 6]`矩阵，129280是词表大小，存储的就是专家id，所以每个token选择的专家是预定义好的，和计算过程和位置等都没有关系
 
