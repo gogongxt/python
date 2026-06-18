@@ -15,7 +15,10 @@ models=(
   "/nfs/ofs-llm-ssd/models/opensource/GLM-4.5V"
   "/nfs/ofs-llm-ssd/models/opensource/GLM-4.7-Flash"
   "/nfs/ofs-llm-ssd/models/opensource/GLM-5.1"
+  "/nfs/ofs-llab-cold/model/zai-org/GLM-5.1-FP8"
   "/nfs/ofs-llm-ssd/models/opensource/GLM-5.1-w8a8"
+  "/nfs/ofs-luban-data/model/ZhipuAI/GLM-5.2"
+  "/nfs/ofs-luban-data/model/ZhipuAI/GLM-5.2-FP8"
 
   "/nfs/ofs-llm-ssd/models/opensource/QwQ-32B"
   "/nfs/ofs-llm-ssd/models/opensource/Qwen2-0.5B-Instruct"
@@ -51,8 +54,9 @@ models=(
   "/nfs/ofs-llm-ssd/models/opensource/Qwen3.6-35B-A3B"
 
   "/nfs/ofs-llab-cold/model/moonshotai/Kimi-K2-Instruct"
-  "/nfs/ofs-llab-cold/model/moonshotai/Kimi-K2.5"
   "/nfs/ofs-llab-cold/model/moonshotai/Kimi-Linear-48B-A3B-Instruct"
+  "/nfs/ofs-llab-cold/model/moonshotai/Kimi-K2.5"
+  "/nfs/ofs-luban-data/model/moonshotai/Kimi-K2.6"
 
   "/nfs/ofs-llm-ssd/models/opensource/gpt-oss-20b"
   "/nfs/ofs-llm-ssd/models/opensource/gpt-oss-20b-bf16"
@@ -62,6 +66,8 @@ models=(
   "/nfs/ofs-llm-ssd/models/opensource/Meta-Llama-3.1-8B-Instruct"
 
   "/nfs/ofs-llm-ssd/models/opensource/MiniMax-M2.7"
+  "/nfs/ofs-luban-data/model/MiniMax/MiniMax-M3"
+  "/nfs/ofs-luban-data/model/MiniMax/MiniMax-M3-MXFP8"
 
   "/nfs/ofs-llm-ssd/models/opensource/gemma-4-31B-it"
 )
