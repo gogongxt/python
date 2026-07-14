@@ -69,6 +69,9 @@ models=(
   "/nfs/ofs-luban-data/model/MiniMax/MiniMax-M3"
   "/nfs/ofs-luban-data/model/MiniMax/MiniMax-M3-MXFP8"
 
+  "/nfs/ofs-luban-data/model/XiaomiMiMo/MiMo-V2.5"
+  "/nfs/ofs-luban-data/model/XiaomiMiMo/MiMo-V2.5-Pro"
+
   "/nfs/ofs-llm-ssd/models/opensource/gemma-4-31B-it"
 )
 
