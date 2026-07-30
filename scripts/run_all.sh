@@ -57,6 +57,8 @@ models=(
   "/nfs/ofs-llab-cold/model/moonshotai/Kimi-Linear-48B-A3B-Instruct"
   "/nfs/ofs-llab-cold/model/moonshotai/Kimi-K2.5"
   "/nfs/ofs-luban-data/model/moonshotai/Kimi-K2.6"
+  "/nfs/ofs-luban-data/model/moonshotai/Kimi-K2.7-Code"
+  "/nfs/ofs-luban-data/model/moonshotai/Kimi-K3"
 
   "/nfs/ofs-llm-ssd/models/opensource/gpt-oss-20b"
   "/nfs/ofs-llm-ssd/models/opensource/gpt-oss-20b-bf16"
