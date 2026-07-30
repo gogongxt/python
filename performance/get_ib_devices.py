@@ -11,7 +11,18 @@ GPU ↔ RDMA 网卡拓扑匹配原理
 1. 设备发现
    遍历 /sys/bus/pci/devices/*，通过 vendor ID 识别设备类型：
    - 0x10de → NVIDIA 设备（GPU 和 NVSwitch 都是此 vendor）
-   - 0x15b3 → Mellanox InfiniBand 网卡
+   - 0x15b3 → Mellanox RDMA 网卡
+
+   统计"GPU 可用的 RDMA 网卡"需同时满足三个条件：
+   (a) 是 RDMA 卡 —— 有 /sys/class/infiniband/ 入口（InfiniBand 或 RoCE 均可，
+       两者都提供 RDMA 语义，NCCL 都能用）
+   (b) 端口物理接线 —— phys_state 含 "LinkUp"，排除未连线端口
+       （未连线时 rate 文件返回驱动默认值，无意义）
+   (c) GPUDirect RDMA 已启用 —— nvidia_peermem 内核模块已加载（机器级开关，
+       未加载则整机 RDMA 卡对 GPU 都不可用，无法做 GPU↔网卡 P2P 直通）
+
+   NVIDIA 设备按 PCI class 进一步过滤：只保留 GPU（0x030000 VGA /
+   0x030200 3D controller），排除同 vendor 的 NVSwitch（0x068000 Bridge）。
 
 2. 构建 PCI 祖先链
    对每个设备，沿 /sys/devices/pci... 的 realpath 逐级向上回溯，
@@ -237,6 +248,71 @@ def get_ib_name(dev_path):
     return None
 
 
+def get_ib_port_info(dev_path):
+    """读取 RDMA 网卡首个端口的属性。
+
+    返回 dict:
+      {"link_layer": "InfiniBand"|"Ethernet"|...,
+       "phys_state": "5: LinkUp"|...,   # 物理连接状态
+       "rate": "400 Gb/sec (4X NDR)"|...}
+    读不到时各字段为 "unknown"。
+
+    通过 /sys/class/infiniband/<dev>/ports/<n>/{link_layer,phys_state,rate} 获取。
+    """
+    empty = {"link_layer": "unknown", "phys_state": "unknown", "rate": "unknown"}
+    ib_name = get_ib_name(dev_path)
+    if not ib_name:
+        return empty
+    ports_dir = f"/sys/class/infiniband/{ib_name}/ports"
+    try:
+        ports = sorted(os.listdir(ports_dir), key=int)
+    except Exception:
+        return empty
+    if not ports:
+        return empty
+    port_dir = os.path.join(ports_dir, ports[0])
+    info = dict(empty)
+    for key in ("link_layer", "phys_state", "rate"):
+        try:
+            info[key] = open(os.path.join(port_dir, key)).read().strip()
+        except Exception:
+            pass
+    return info
+
+
+def get_ib_rate(dev_path):
+    """读取 RDMA 网卡首个端口的速率，格式如 "400 Gb/sec (4X NDR)"。"""
+    return get_ib_port_info(dev_path)["rate"]
+
+
+def is_port_link_up(dev_path):
+    """端口是否物理接线并 LinkUp。
+
+    phys_state 形如 "5: LinkUp"。端口未接线(Disabled/Polling)时返回 False，
+    此时 rate 文件返回的是驱动默认值（无意义），不应纳入统计。
+    """
+    return "LinkUp" in get_ib_port_info(dev_path)["phys_state"]
+
+
+def is_gpudirect_enabled():
+    """整机是否启用了 GPUDirect RDMA（GPU↔网卡 P2P 直通）。
+
+    判据：nvidia_peermem 内核模块已加载。该模块让 RDMA 子系统直接映射 GPU
+    显存，是 GPU 通过 RDMA 网卡通信的必需内核组件。模块是机器级开关——
+    要么整机加载(所有 RDMA 卡对 GPU 可用)，要么整机未加载(都不可用)。
+    """
+    try:
+        with open("/proc/modules") as f:
+            for line in f:
+                if line.startswith("nvidia_peermem ") or line.startswith(
+                    "nv_peer_mem "
+                ):
+                    return True
+    except Exception:
+        pass
+    return False
+
+
 def pci_ancestors(dev_path):
     """返回该 PCI 设备的所有上级 PCI 桥节点（BDF 地址列表）"""
     path = os.path.realpath(dev_path)
@@ -254,6 +330,9 @@ def pci_ancestors(dev_path):
 
 def detect_devices():
     gpus, ibs = [], []
+    # GPUDirect RDMA 是机器级开关：nvidia_peermem 未加载则整机 RDMA 卡对 GPU
+    # 都不可用，无需逐卡判断。
+    gpudirect = is_gpudirect_enabled()
     for dev_path in glob.glob("/sys/bus/pci/devices/*"):
         if is_gpu(dev_path):  # 仅 NVIDIA GPU，排除 NVSwitch
             gpus.append(
@@ -264,14 +343,19 @@ def detect_devices():
                     "ancestors": pci_ancestors(dev_path),
                 }
             )
-        elif get_vendor(dev_path) == "0x15b3":  # Mellanox IB
+        elif get_vendor(dev_path) == "0x15b3":  # Mellanox RDMA 卡
             ib_name = get_ib_name(dev_path)
-            if ib_name:
+            # 统计"GPU 可用的 RDMA 网卡"需同时满足：
+            #   (1) 是 RDMA 卡（有 infiniband/ 目录，IB 或 RoCE 均可）
+            #   (2) 端口物理接线 LinkUp（排除未连线端口的无效速率）
+            #   (3) 整机 GPUDirect RDMA 已启用（nvidia_peermem 已加载）
+            if ib_name and is_port_link_up(dev_path) and gpudirect:
                 ibs.append(
                     {
                         "path": dev_path,
                         "pci": os.path.basename(dev_path),
                         "ib_name": ib_name,
+                        "rate": get_ib_rate(dev_path),
                         "numa": get_numa(dev_path),
                         "ancestors": pci_ancestors(dev_path),
                     }
@@ -331,13 +415,24 @@ def match_gpu_ib():
         print("No GPU or IB devices found.")
         return ""
     print("Detected GPU ↔ IB Topology (by PCI ancestry):\n")
+    # name -> rate，用于汇总行；同一 IB 可能被多 GPU 共享，取首次出现
+    ib_rate = {}
     for gpu, ib, shared in matched:
         if ib:
-            print(f"GPU {gpu['pci']} ↔ IB {ib['ib_name']} (shared bridge: {shared})")
+            ib_rate[ib["ib_name"]] = ib.get("rate", "unknown")
+            print(
+                f"GPU {gpu['pci']} ↔ IB {ib['ib_name']} "
+                f"[{ib.get('rate', 'unknown')}] (shared bridge: {shared})"
+            )
         else:
             print(f"GPU {gpu['pci']} ↔ (no nearby IB found)")
     all_ib_names = ",".join(sorted(matched_ibs))
+    # 汇总行：每个 IB 名后附速率，如 "mlx5_0(400 Gb/sec (4X NDR)),mlx5_1(...)"
+    ib_with_rate = ",".join(
+        f"{name}({ib_rate.get(name, 'unknown')})" for name in sorted(matched_ibs)
+    )
     print(f"\nIB devices (GPU-attached): {all_ib_names}")
+    print(f"IB rates: {ib_with_rate}")
     return all_ib_names
 
 
