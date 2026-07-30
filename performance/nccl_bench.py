@@ -60,7 +60,7 @@ class BenchmarkResult:
 def busbw_factor(op_name: str, n: int) -> float:
     if op_name == "AllReduce":
         return 2.0 * (n - 1) / n
-    elif op_name in ("AllGather", "ReduceScatter", "AllToAll"):
+    elif op_name in ("AllGather", "ReduceScatter", "AllToAll", "AllToAllv"):
         return (n - 1) / n
     elif op_name in ("Broadcast", "Reduce"):
         return 1.0
@@ -190,6 +190,16 @@ class NcclBenchmark:
         avg_ms = self._time_op(lambda: dist.broadcast(t, src=0), num_warmup, num_iters)
         return self._make_result("Broadcast", t.nbytes, avg_ms, num_warmup, num_iters)
 
+    def bench_reduce(
+        self, count: int, dtype: torch.dtype, num_warmup: int, num_iters: int
+    ) -> BenchmarkResult:
+        """data_size = message size = count * itemsize (single root receives)"""
+        t = torch.randn(count, dtype=dtype, device=self.device)
+        avg_ms = self._time_op(
+            lambda: dist.reduce(t, dst=0, op=dist.ReduceOp.SUM), num_warmup, num_iters
+        )
+        return self._make_result("Reduce", t.nbytes, avg_ms, num_warmup, num_iters)
+
     def bench_alltoall(
         self, count: int, dtype: torch.dtype, num_warmup: int, num_iters: int
     ) -> BenchmarkResult:
@@ -203,6 +213,36 @@ class NcclBenchmark:
             lambda: dist.all_to_all_single(out, inp), num_warmup, num_iters
         )
         return self._make_result("AllToAll", inp.nbytes, avg_ms, num_warmup, num_iters)
+
+    def bench_alltoallv(
+        self, count: int, dtype: torch.dtype, num_warmup: int, num_iters: int
+    ) -> BenchmarkResult:
+        """Variable-length all-to-all. data_size = total send = sum of per-peer chunks.
+
+        Build a consistent send matrix M[r][i] = elements rank r sends to rank i.
+        Rank r's input_split_sizes  = row r of M.
+        Rank i's output_split_sizes = column i of M (what it receives from each rank).
+        Using M[r][i] = base + ((r + i) % n) * unit yields unequal per-peer chunks
+        while keeping every rank's total send == total recv (a permutation of one multiset).
+        """
+        n = self.world_size
+        # unit chosen so sum(send_splits) = unit * n*(n+1)/2 ≈ count,
+        # keeping AllToAllv data_size on the same scale as the other ops.
+        unit = max(count // (n * (n + 1) // 2), 1)
+        r = self.rank
+        send_splits = [unit + ((r + i) % n) * unit for i in range(n)]
+        recv_splits = [unit + ((src + r) % n) * unit for src in range(n)]
+
+        inp = torch.randn(sum(send_splits), dtype=dtype, device=self.device)
+        out = torch.empty(sum(recv_splits), dtype=dtype, device=self.device)
+        avg_ms = self._time_op(
+            lambda: dist.all_to_all_single(
+                out, inp, output_split_sizes=recv_splits, input_split_sizes=send_splits
+            ),
+            num_warmup,
+            num_iters,
+        )
+        return self._make_result("AllToAllv", inp.nbytes, avg_ms, num_warmup, num_iters)
 
     # ------------------------------------------------------------------
     # Full benchmark sweep
@@ -222,7 +262,9 @@ class NcclBenchmark:
             ("AllGather", self.bench_allgather),
             ("ReduceScatter", self.bench_reducescatter),
             ("Broadcast", self.bench_broadcast),
+            ("Reduce", self.bench_reduce),
             ("AllToAll", self.bench_alltoall),
+            ("AllToAllv", self.bench_alltoallv),
         ]
         if ops and "all" not in ops:
             op_registry = [(n, f) for n, f in op_registry if n.lower() in ops]
@@ -290,7 +332,9 @@ def main():
             "allgather",
             "reducescatter",
             "broadcast",
+            "reduce",
             "alltoall",
+            "alltoallv",
         ],
     )
     parser.add_argument("--output", default="nccl_benchmark_results.json")
