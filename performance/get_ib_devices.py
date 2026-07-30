@@ -202,6 +202,24 @@ def get_vendor(dev_path):
         return None
 
 
+# GPU display device 的 PCI class，用于排除同属 vendor 0x10de 的 NVSwitch
+# 0x030000 = VGA controller, 0x030200 = 3D controller
+GPU_PCI_CLASSES = {"0x030000", "0x030200"}
+
+
+def is_gpu(dev_path):
+    """vendor 0x10de 同时包含 GPU 和 NVSwitch（class 0x068000 Bridge），
+    后者不是 GPU，不应参与 IB 匹配。按 class 过滤。"""
+    if get_vendor(dev_path) != "0x10de":
+        return False
+    try:
+        cls = open(os.path.join(dev_path, "class")).read().strip().lower()
+    except Exception:
+        return False
+    # class 形如 0x030200，取前 8 个字符做匹配
+    return cls[:8] in GPU_PCI_CLASSES
+
+
 def get_numa(dev_path):
     try:
         v = int(open(os.path.join(dev_path, "numa_node")).read().strip())
@@ -237,8 +255,7 @@ def pci_ancestors(dev_path):
 def detect_devices():
     gpus, ibs = [], []
     for dev_path in glob.glob("/sys/bus/pci/devices/*"):
-        vendor = get_vendor(dev_path)
-        if vendor == "0x10de":  # NVIDIA GPU
+        if is_gpu(dev_path):  # 仅 NVIDIA GPU，排除 NVSwitch
             gpus.append(
                 {
                     "path": dev_path,
@@ -247,7 +264,7 @@ def detect_devices():
                     "ancestors": pci_ancestors(dev_path),
                 }
             )
-        elif vendor == "0x15b3":  # Mellanox IB
+        elif get_vendor(dev_path) == "0x15b3":  # Mellanox IB
             ib_name = get_ib_name(dev_path)
             if ib_name:
                 ibs.append(
@@ -276,8 +293,11 @@ def find_shared_root(gpu, ib):
 def _find_matched_ib_names():
     """核心匹配逻辑：返回 GPU 匹配到的 IB 设备名集合和匹配详情"""
     gpus, ibs = detect_devices()
-    if not gpus or not ibs:
+    if not gpus:
+        # 真正无设备：连 GPU 都没有
         return [], set()
+    # 注意：有 GPU 但无 IB 时走下面的正常循环，每个 GPU 会标 (no nearby IB found)，
+    # 而不是在这里误报 "No GPU or IB devices found."
     matched = []
     used_ibs = set()
     for gpu in gpus:
