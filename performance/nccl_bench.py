@@ -11,14 +11,44 @@ Data size definition per op (matches nccl-tests):
   AllGather    : total output size   = n * per-rank input
   ReduceScatter: total input size    = n * per-rank output
   Broadcast    : message size S
+  Reduce       : message size S      (single root receives)
   AllToAll     : total send size     = n * per-peer chunk
+  AllToAllv    : total send size     = sum of per-peer chunks (unequal)
 
 busbw correction factors:
   AllReduce    : 2*(n-1)/n
   AllGather    : (n-1)/n
   ReduceScatter: (n-1)/n
   Broadcast    : 1
+  Reduce       : 1
   AllToAll     : (n-1)/n
+  AllToAllv    : (n-1)/n
+
+Usage:
+  Run with torchrun, one process per GPU. nproc_per_node = number of GPUs.
+
+    # All ops, single 512 MB size, 8 GPUs (default dtype=bfloat16)
+    torchrun --nproc_per_node=8 performance/nccl_bench.py --size-mb 512
+
+    # Use the env that has PyTorch + NCCL installed
+    torchrun \\
+        --nproc_per_node=8 performance/nccl_bench.py --size-mb 512
+
+    # Only AllReduce + AllGather, 1 GB, more iterations
+    torchrun --nproc_per_node=8 performance/nccl_bench.py \\
+        --size-mb 1024 --ops allreduce allgather --iterations 200
+
+    # Multi-node: set --nnodes, --nproc_per_node, and a shared --rdzv endpoint
+    # (rank 0 host):  torchrun --nnodes=2 --nproc_per_node=8 --rdzv_backend=c10d \
+    #                 --rdzv_endpoint=<rank0_ip>:29500 performance/nccl_bench.py
+    # (rank 1 host):  torchrun --nnodes=2 --nproc_per_node=8 --rdzv_backend=c10d \
+    #                 --rdzv_endpoint=<rank0_ip>:29500 performance/nccl_bench.py
+
+  Results (one entry per op) are written to --output as JSON. nccl-tests
+  environment variables (NCCL_DEBUG, NCCL_NET, etc.) work as usual.
+
+  --ops with "all" runs every op; otherwise pass a subset (allreduce,
+  allgather, reducescatter, broadcast, reduce, alltoall, alltoallv).
 """
 
 import argparse
@@ -27,7 +57,6 @@ import os
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Tuple
 
-import numpy as np
 import torch
 import torch.distributed as dist
 
@@ -281,6 +310,17 @@ class NcclBenchmark:
             f"warmup={num_warmup}  iters={num_iters}"
         )
         log("=" * 95)
+        log("字段说明:")
+        log(
+            "  algbw = 数据量 / 耗时            应用视角的吞吐,随 rank 数变化,无法直接对比硬件峰值"
+        )
+        log(
+            "  busbw = algbw × 校正因子        归一化后的单向链路带宽,与 rank 数无关,用于对标 NVLink 峰值"
+        )
+        log(
+            "  注:busbw 为单向口径。可以直接对比 NVLink 单向速度，例如H200 nv18 单向速度是450GB/s "
+        )
+        log("")
         log(
             f"{'Op':15s} | {'DataSize(MB)':>12s} | {'Time(ms)':>10s} | "
             f"{'algbw(GB/s)':>12s} | {'busbw(GB/s)':>12s}"
@@ -310,11 +350,27 @@ class NcclBenchmark:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="NCCL benchmark (nccl-tests conventions)"
+        description="NCCL benchmark (nccl-tests conventions)",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""\
+examples:
+  # All ops, 512 MB, 8 GPUs (default dtype=bfloat16)
+  torchrun --nproc_per_node=8 performance/nccl_bench.py --size-mb 512
+
+  # Use the env with PyTorch + NCCL
+  torchrun --nproc_per_node=8 performance/nccl_bench.py --size-mb 512
+
+  # Only AllReduce + AllGather, 1 GB, more iterations
+  torchrun --nproc_per_node=8 performance/nccl_bench.py \\
+      --size-mb 1024 --ops allreduce allgather --iterations 200
+""",
     )
-    parser.add_argument("--min-size-mb", type=float, default=1.0)
-    parser.add_argument("--max-size-mb", type=float, default=512.0)
-    parser.add_argument("--num-sizes", type=int, default=10)
+    parser.add_argument(
+        "--size-mb",
+        type=float,
+        default=1024.0,
+        help="Single data size in MB to benchmark (no size sweep).",
+    )
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument(
@@ -348,12 +404,7 @@ def main():
     }[args.dtype]
     itemsize = torch.tensor([], dtype=dtype).element_size()
 
-    min_count = int(args.min_size_mb * 1024**2 / itemsize)
-    max_count = int(args.max_size_mb * 1024**2 / itemsize)
-    counts = [
-        int(x)
-        for x in np.logspace(np.log10(min_count), np.log10(max_count), args.num_sizes)
-    ]
+    counts = [int(args.size_mb * 1024**2 / itemsize)]
 
     bench = NcclBenchmark()
     bench.init_distributed()

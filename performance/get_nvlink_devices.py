@@ -47,41 +47,126 @@ import subprocess
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
-
 # ---------------------------------------------------------------------------
 # NVLink 代际表（按 compute capability 判定，兜底用单链路速率）
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class NVLinkGen:
-    name: str            # "NVLink 2.0"
-    year: int            # 发布年份
-    arch: str            # GPU 架构 / 代表型号
-    modulation: str      # 信号调制 (NRZ / PAM-4)
-    pairs: str           # 每链路差分对数 (Sub-link / Diff-pair)
+    name: str  # "NVLink 2.0"
+    year: int  # 发布年份
+    arch: str  # GPU 架构 / 代表型号
+    modulation: str  # 信号调制 (NRZ / PAM-4)
+    pairs: str  # 每链路差分对数 (Sub-link / Diff-pair)
     per_link_gbs: float  # 标称单链路单向速率 GB/s (双向 ×2)
-    max_links: int       # 该代单 GPU 最多链路数
-    note: str = ""       # 备注
+    max_links: int  # 该代单 GPU 最多链路数
+    note: str = ""  # 备注
 
 
 # 按 compute capability 判定代际
 # 注意: NVLink 代际号比 GPU 架构"晚一代" —— V100=2.0, A100=3.0, H200=4.0, B200=5.0
 _NVLINK_BY_CC: Dict[float, NVLinkGen] = {
-    6.0: NVLinkGen("NVLink 1.0", 2016, "Pascal (P100)", "NRZ", "8 (Sub-link)", 20.0, 4, "首次引入"),
-    7.0: NVLinkGen("NVLink 2.0", 2017, "Volta (V100)", "NRZ", "8 (Sub-link)", 25.0, 6, "引入 NVSwitch 1.0"),
-    8.0: NVLinkGen("NVLink 3.0", 2020, "Ampere (A100)", "NRZ", "4 (Sub-link)", 25.0, 12, "信号对减半, 链路数翻倍"),
-    9.0: NVLinkGen("NVLink 4.0", 2022, "Hopper (H200)", "PAM-4", "2 (Diff-pair)", 25.0, 18, "引入 SHARP"),
-    10.0: NVLinkGen("NVLink 5.0", 2024, "Blackwell (B200)", "PAM-4", "2 (Diff-pair)", 50.0, 18, "支持 NVL72 机架级扩展"),
+    6.0: NVLinkGen(
+        "NVLink 1.0", 2016, "Pascal (P100)", "NRZ", "8 (Sub-link)", 20.0, 4, "首次引入"
+    ),
+    7.0: NVLinkGen(
+        "NVLink 2.0",
+        2017,
+        "Volta (V100)",
+        "NRZ",
+        "8 (Sub-link)",
+        25.0,
+        6,
+        "引入 NVSwitch 1.0",
+    ),
+    8.0: NVLinkGen(
+        "NVLink 3.0",
+        2020,
+        "Ampere (A100)",
+        "NRZ",
+        "4 (Sub-link)",
+        25.0,
+        12,
+        "信号对减半, 链路数翻倍",
+    ),
+    9.0: NVLinkGen(
+        "NVLink 4.0",
+        2022,
+        "Hopper (H200)",
+        "PAM-4",
+        "2 (Diff-pair)",
+        25.0,
+        18,
+        "引入 SHARP",
+    ),
+    10.0: NVLinkGen(
+        "NVLink 5.0",
+        2024,
+        "Blackwell (B200)",
+        "PAM-4",
+        "2 (Diff-pair)",
+        50.0,
+        18,
+        "支持 NVL72 机架级扩展",
+    ),
 }
 
 # 全部代际 (含 GH200/Rubin), 用于开头打印参考表
 _ALL_NVLINK_GENS: List[NVLinkGen] = [
-    NVLinkGen("NVLink 1.0", 2016, "Pascal (P100)", "NRZ", "8 (Sub-link)", 20.0, 4, "首次引入"),
-    NVLinkGen("NVLink 2.0", 2017, "Volta (V100)", "NRZ", "8 (Sub-link)", 25.0, 6, "引入 NVSwitch 1.0"),
-    NVLinkGen("NVLink 3.0", 2020, "Ampere (A100)", "NRZ", "4 (Sub-link)", 25.0, 12, "信号对减半, 链路数翻倍"),
-    NVLinkGen("NVLink 4.0", 2022, "Hopper (H200)", "PAM-4", "2 (Diff-pair)", 25.0, 18, "引入 SHARP; H200 均 900 GB/s"),
-    NVLinkGen("NVLink 5.0", 2024, "Blackwell (B200)", "PAM-4", "2 (Diff-pair)", 50.0, 18, "支持 NVL72 机架级扩展"),
-    NVLinkGen("NVLink 6.0", 2026, "Rubin (Vera)", "-", "-", 0.0, 0, "NVLink Switch 6, RAS 增强; 3.6 TB/s"),
+    NVLinkGen(
+        "NVLink 1.0", 2016, "Pascal (P100)", "NRZ", "8 (Sub-link)", 20.0, 4, "首次引入"
+    ),
+    NVLinkGen(
+        "NVLink 2.0",
+        2017,
+        "Volta (V100)",
+        "NRZ",
+        "8 (Sub-link)",
+        25.0,
+        6,
+        "引入 NVSwitch 1.0",
+    ),
+    NVLinkGen(
+        "NVLink 3.0",
+        2020,
+        "Ampere (A100)",
+        "NRZ",
+        "4 (Sub-link)",
+        25.0,
+        12,
+        "信号对减半, 链路数翻倍",
+    ),
+    NVLinkGen(
+        "NVLink 4.0",
+        2022,
+        "Hopper (H200)",
+        "PAM-4",
+        "2 (Diff-pair)",
+        25.0,
+        18,
+        "引入 SHARP; H200 均 900 GB/s",
+    ),
+    NVLinkGen(
+        "NVLink 5.0",
+        2024,
+        "Blackwell (B200)",
+        "PAM-4",
+        "2 (Diff-pair)",
+        50.0,
+        18,
+        "支持 NVL72 机架级扩展",
+    ),
+    NVLinkGen(
+        "NVLink 6.0",
+        2026,
+        "Rubin (Vera)",
+        "-",
+        "-",
+        0.0,
+        0,
+        "NVLink Switch 6, RAS 增强; 3.6 TB/s",
+    ),
 ]
 
 
@@ -100,19 +185,27 @@ def print_nvlink_reference():
     print("=" * W)
     print("NVLink Generation Reference  (单链路速率为单向, 双向聚合 = 单链路×链路数×2)")
     print("=" * W)
-    hdr = (f"{'Gen':<10}{'Year':>6} {'Arch':<20}{'Mod':<7}{'Pairs':<16}"
-           f"{'Per-link':>11}{'Links':>7}{'Bi-Aggregate':>16}  Note")
+    hdr = (
+        f"{'Gen':<10}{'Year':>6} {'Arch':<20}{'Mod':<7}{'Pairs':<16}"
+        f"{'Per-link':>11}{'Links':>7}{'Bi-Aggregate':>16}  Note"
+    )
     print(hdr)
     print("-" * W)
     for g in _ALL_NVLINK_GENS:
         bi = g.per_link_gbs * g.max_links * 2
         per = f"{g.per_link_gbs:.0f} GB/s" if g.per_link_gbs > 0 else "-"
         links = str(g.max_links) if g.max_links > 0 else "-"
-        print(f"{g.name:<10}{g.year:>6} {g.arch:<20}{g.modulation:<7}{g.pairs:<16}"
-              f"{per:>11}{links:>7}{_fmt_bw(bi):>16}  {g.note}")
+        print(
+            f"{g.name:<10}{g.year:>6} {g.arch:<20}{g.modulation:<7}{g.pairs:<16}"
+            f"{per:>11}{links:>7}{_fmt_bw(bi):>16}  {g.note}"
+        )
     print("-" * W)
-    print("注: 代际号比 GPU 架构晚一代 —— V100=2.0, A100=3.0, H200=4.0, B200=5.0 (别把 V100 当 1.0)。")
-    print("    Bi-Aggregate 为该代满配单 GPU 双向峰值; 实际以本机活动链路数为准 (见下)。\n")
+    print(
+        "注: 代际号比 GPU 架构晚一代 —— V100=2.0, A100=3.0, H200=4.0, B200=5.0 (别把 V100 当 1.0)。"
+    )
+    print(
+        "    Bi-Aggregate 为该代满配单 GPU 双向峰值; 实际以本机活动链路数为准 (见下)。\n"
+    )
 
 
 def infer_nvlink_gen(compute_cap: float) -> NVLinkGen:
@@ -123,13 +216,12 @@ def infer_nvlink_gen(compute_cap: float) -> NVLinkGen:
 
     H200 为 cc 9.0、同属 NVLink 4.0, 单链路 25 GB/s, 双向聚合 900 GB/s。
     """
-    # 兜底：未在表中的 cc，按架构版本就近取
+    # 兜底：未在表中的 cc，按主版本号就近向下取最近的代际
     if compute_cap in _NVLINK_BY_CC:
         return _NVLINK_BY_CC[compute_cap]
-    # 取主版本号最近的代际
-    major = float(compute_cap) // 1.0
+    major = int(compute_cap)
     for cc in sorted(_NVLINK_BY_CC, reverse=True):
-        if major >= cc // 1.0:
+        if major >= int(cc):
             return _NVLINK_BY_CC[cc]
     return NVLinkGen("Unknown", 0, "Unknown", "?", "?", 0.0, 0, "")
 
@@ -138,11 +230,15 @@ def infer_nvlink_gen(compute_cap: float) -> NVLinkGen:
 # nvidia-smi 调用封装
 # ---------------------------------------------------------------------------
 
+
 def _run(cmd: List[str]) -> str:
     """运行命令并返回 stdout，失败返回空串。"""
     try:
         r = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=30,
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         return r.stdout if r.returncode == 0 else ""
     except Exception:
@@ -156,8 +252,13 @@ def _gpu_count() -> int:
 
 def _query_gpu(fields: List[str]) -> List[str]:
     """返回每张 GPU 指定字段的值列表（按 index 顺序）。"""
-    out = _run(["nvidia-smi", "--query-gpu=" + ",".join(fields),
-                "--format=csv,noheader,nounits"])
+    out = _run(
+        [
+            "nvidia-smi",
+            "--query-gpu=" + ",".join(fields),
+            "--format=csv,noheader,nounits",
+        ]
+    )
     return [l.strip() for l in out.splitlines() if l.strip()]
 
 
@@ -212,13 +313,16 @@ def _parse_remote_link_info(text: str) -> Dict[int, Tuple[str, str]]:
 # 检测核心
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class LinkInfo:
     link_id: int
-    state: str        # "Active" / "Inactive"
-    rate_gbs: float   # 单链路双向速率 GB/s，Inactive 为 0
-    peer_pci: str     # 对端 PCI bus ID，无则 ""
-    peer_link: int    # 对端 Link ID，-1 表示未知
+    state: str  # "Active" / "Inactive"
+    rate_gbs: (
+        float  # 单链路单向原始速率 GB/s (nvidia-smi 报告值, 如 26.562)，Inactive 为 0
+    )
+    peer_pci: str  # 对端 PCI bus ID，无则 ""
+    peer_link: int  # 对端 Link ID，-1 表示未知
 
 
 @dataclass
@@ -244,7 +348,7 @@ class GPUInfo:
 
     @property
     def per_link_gbs(self) -> float:
-        """实际测得的活动单链路速率（取首条活动链路）。无活动链路返回 0。"""
+        """实际测得的活动单链路速率（取首条活动链路, nvidia-smi 报告值）。无活动链路返回 0。"""
         for l in self.active_links:
             return l.rate_gbs
         return 0.0
@@ -253,7 +357,7 @@ class GPUInfo:
     def aggregate_gbs(self) -> float:
         """单向聚合带宽 = 活动链路数 × 单链路速率（GB/s）。
 
-        nvidia-smi 报的单链路速率（如 25 / 26.562 GB/s）是单向峰值。
+        单链路速率取 nvidia-smi 报告的原始值（如 A800 25、H200 26.562 GB/s, 单向）。
         官方标称带宽通常指双向：单向 × 2（见 bidirectional_gbs）。
         """
         per = self.per_link_gbs or self.nvlink_gen.per_link_gbs
@@ -263,30 +367,6 @@ class GPUInfo:
     def bidirectional_gbs(self) -> float:
         """双向聚合带宽 = 单向聚合 × 2（GB/s）。对齐 NVIDIA 官方标称口径。"""
         return self.aggregate_gbs * 2
-
-    # ---- 集合通信预期带宽（理论峰值, GB/s） ----
-    # 基于 NCCL ring/tree 算法的 busbw 公式, B = 单 GPU 单向聚合带宽。
-    # algbw = busbw / factor。busbw 是衡量硬件利用率的口径(对齐 nccl-tests)。
-
-    def expected_p2p_gbs(self, world_size: int) -> float:
-        """点对点拷贝预期带宽 = 单 GPU 单向聚合带宽。
-
-        NVSwitch fabric 无竞争时, 一张卡可把全部上行带宽倾注给另一张卡,
-        因此单 P2P 拷贝峰值 ≈ 单向聚合带宽 (GB/s)。
-        """
-        return self.aggregate_gbs
-
-    def expected_allreduce_busbw_gbs(self, world_size: int) -> float:
-        """AllReduce busbw 理论峰值 = 2*(n-1)/n * B (GB/s)。"""
-        if world_size <= 1:
-            return 0.0
-        return 2.0 * (world_size - 1) / world_size * self.aggregate_gbs
-
-    def expected_allgather_busbw_gbs(self, world_size: int) -> float:
-        """AllGather busbw 理论峰值 = (n-1)/n * B (GB/s)。"""
-        if world_size <= 1:
-            return 0.0
-        return (world_size - 1) / world_size * self.aggregate_gbs
 
     def to_dict(self) -> dict:
         return {
@@ -300,15 +380,6 @@ class GPUInfo:
             "per_link_gbps": round(self.per_link_gbs, 3),
             "aggregate_gbps": round(self.aggregate_gbs, 3),
             "bidirectional_gbps": round(self.bidirectional_gbs, 3),
-            "expected": {
-                "p2p_gbps": round(self.expected_p2p_gbs(0), 3),
-                "allreduce_busbw_gbps": round(
-                    self.expected_allreduce_busbw_gbs(0), 3),
-                "allgather_busbw_gbps": round(
-                    self.expected_allgather_busbw_gbs(0), 3),
-                "_note": "p2p=单向聚合; allreduce/allgather busbw 公式: "
-                         "2(n-1)/n*B / (n-1)/n*B, B=单向聚合, 按 world_size=n 计算",
-            },
             "links": [
                 {
                     "link": l.link_id,
@@ -355,7 +426,9 @@ def detect() -> List[GPUInfo]:
 
         status = _run(["nvidia-smi", "nvlink", "-s", "-i", str(i)])
         peer = _parse_remote_peer(_run(["nvidia-smi", "nvlink", "-p", "-i", str(i)]))
-        rlink = _parse_remote_link_info(_run(["nvidia-smi", "nvlink", "-R", "-i", str(i)]))
+        rlink = _parse_remote_link_info(
+            _run(["nvidia-smi", "nvlink", "-R", "-i", str(i)])
+        )
 
         links: List[LinkInfo] = []
         for lid, rate_str in _parse_link_status(status):
@@ -400,6 +473,7 @@ def _resolve_peers(gpus: List[GPUInfo]):
 # 输出
 # ---------------------------------------------------------------------------
 
+
 def _fmt_gbs(v: float) -> str:
     return f"{v:.2f} GB/s" if v else "N/A"
 
@@ -420,60 +494,33 @@ def print_detail(gpus: List[GPUInfo]):
         print(f"  Links           : {g.active_link_count}/{g.total_links} active")
         print(f"  Per-link speed  : {_fmt_gbs(g.per_link_gbs)}  (unidirectional)")
         print(f"  Aggregate BW    : {_fmt_gbs(g.aggregate_gbs)}  unidirectional")
-        print(f"                  : {_fmt_gbs(g.bidirectional_gbs)}  bidirectional (peak)")
+        print(
+            f"                  : {_fmt_gbs(g.bidirectional_gbs)}  bidirectional (peak)"
+        )
         print(f"  Link details:")
         for l in g.links:
             peer = l.peer_pci or "-"
             rlink = f"Link {l.peer_link}" if l.peer_link >= 0 else ""
-            print(f"    Link {l.link_id:2d}: {l.state:8s} "
-                  f"{_fmt_gbs(l.rate_gbs):14s} peer {peer} {rlink}")
+            print(
+                f"    Link {l.link_id:2d}: {l.state:8s} "
+                f"{_fmt_gbs(l.rate_gbs):14s} peer {peer} {rlink}"
+            )
 
     print("\n" + "=" * 78)
     print("Summary")
     print("=" * 78)
     for g in gpus:
-        print(f"GPU{g.index} [{g.name:24s}] {g.nvlink_gen.name:12s} "
-              f"{g.active_link_count}/{g.total_links} links  "
-              f"{_fmt_gbs(g.aggregate_gbs)} / {_fmt_gbs(g.bidirectional_gbs)} (uni/bi)")
+        print(
+            f"GPU{g.index} [{g.name:24s}] {g.nvlink_gen.name:12s} "
+            f"{g.active_link_count}/{g.total_links} links  "
+            f"{_fmt_gbs(g.aggregate_gbs)} / {_fmt_gbs(g.bidirectional_gbs)} (uni/bi)"
+        )
     total = sum(g.aggregate_gbs for g in gpus)
     total_bi = sum(g.bidirectional_gbs for g in gpus)
-    print(f"\nTotal aggregate NVLink bandwidth (all GPUs): "
-          f"{total:.2f} GB/s uni  /  {total_bi:.2f} GB/s bi")
-
-    # 预期带宽: 以首张 GPU 的单向聚合带宽 B 为基准, n = GPU 数
-    _print_expected_bandwidth(gpus)
-
-
-def _print_expected_bandwidth(gpus: List[GPUInfo]):
-    """打印集合通信预期带宽 (理论峰值)。
-
-    B = 单 GPU 单向聚合带宽 (nvidia-smi 报的链路速率为单向)。
-    - P2P 拷贝    : ≈ B (NVSwitch fabric 无竞争时单卡可全速倾注给另一卡)
-    - AllReduce   : busbw = 2*(n-1)/n * B
-    - AllGather   : busbw = (n-1)/n * B
-    busbw 对齐 nccl-tests 口径; algbw = busbw / factor, 见 nccl_bench.py。
-    """
-    if not gpus:
-        return
-    g = gpus[0]
-    n = len(gpus)
-    B = g.aggregate_gbs
-    if n <= 1 or B <= 0:
-        print("\n(需 >=2 GPU 且有活动 NVLink 才能估算集合通信预期带宽)")
-        return
-    p2p = g.expected_p2p_gbs(n)
-    ar = g.expected_allreduce_busbw_gbs(n)
-    ag = g.expected_allgather_busbw_gbs(n)
-
-    print("\n" + "=" * 78)
-    print(f"Expected Collective Bandwidth (B = {B:.2f} GB/s uni, n = {n} GPUs)")
-    print("=" * 78)
-    print(f"  P2P copy (1-to-1)    : {p2p:8.2f} GB/s   [≈ B, NVSwitch 无竞争峰值]")
-    print(f"  AllReduce  busbw     : {ar:8.2f} GB/s   [2*(n-1)/n * B]")
-    print(f"  AllGather  busbw     : {ag:8.2f} GB/s   [(n-1)/n * B]")
-    print("-" * 78)
-    print("注: busbw 为硬件利用率口径 (对齐 nccl-tests); 实测受 topology/算法/消息大小影响,")
-    print("    通常为理论值的 70~90%。AllReduce algbw ≈ busbw / [2*(n-1)/n]。")
+    print(
+        f"\nTotal aggregate NVLink bandwidth (all GPUs): "
+        f"{total:.2f} GB/s uni  /  {total_bi:.2f} GB/s bi"
+    )
 
 
 def print_simple(gpus: List[GPUInfo]):
@@ -482,9 +529,11 @@ def print_simple(gpus: List[GPUInfo]):
         print("")
         return
     for g in gpus:
-        print(f"GPU{g.index} {g.name} {g.nvlink_gen.name} "
-              f"{g.active_link_count}/{g.total_links}links "
-              f"{g.bidirectional_gbs:.2f}GB/s(bi)")
+        print(
+            f"GPU{g.index} {g.name} {g.nvlink_gen.name} "
+            f"{g.active_link_count}/{g.total_links}links "
+            f"{g.bidirectional_gbs:.2f}GB/s(bi)"
+        )
 
 
 def main():

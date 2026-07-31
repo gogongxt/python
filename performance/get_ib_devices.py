@@ -204,6 +204,48 @@ IB 列表：mlx5_0,mlx5_1,mlx5_2,mlx5_5,mlx5_6,mlx5_7,mlx5_8,mlx5_9
 import glob
 import os
 import re
+import subprocess
+
+
+def _norm_bdf(bdf):
+    """归一化 PCI BDF 为小写 "bb:dd.f"（去掉 domain 前缀）。
+
+    nvidia-smi 给 "00000000:BA:00.0"，sysfs 给 "0000:ba:00.0"，
+    domain 位数不一致，统一剥掉 domain 以保证两侧键可匹配。
+    """
+    bdf = bdf.lower()
+    parts = bdf.split(":")
+    # 形如 [domain, bus, dev.fn] 或 [bus, dev.fn]，取最后两段
+    return ":".join(parts[-2:])
+
+
+def get_gpu_index_map():
+    """返回 {norm_bdf: cuda_index}，通过 nvidia-smi 查询。
+
+    CUDA 的 GPU 编号（0,1,2,...）由驱动按 PCI bus 升序分配，
+    与 glob("/sys/bus/pci/devices/*") 的 readdir 顺序无关。
+    没装 nvidia-smi 或查询失败时返回空 dict，调用方回退到按 PCI 地址排序。
+    """
+    try:
+        out = subprocess.check_output(
+            ["nvidia-smi", "--query-gpu=index,pci.bus_id", "--format=csv,noheader"],
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=15,
+        )
+    except Exception:
+        return {}
+    m = {}
+    for line in out.strip().splitlines():
+        parts = [p.strip() for p in line.split(",")]
+        if len(parts) < 2:
+            continue
+        try:
+            idx = int(parts[0])
+        except ValueError:
+            continue
+        m[_norm_bdf(parts[1])] = idx
+    return m
 
 
 def get_vendor(dev_path):
@@ -414,25 +456,29 @@ def match_gpu_ib():
     if not matched:
         print("No GPU or IB devices found.")
         return ""
+    # CUDA GPU 编号来自 nvidia-smi（驱动按 PCI bus 升序），与 readdir 顺序无关；
+    # 查询失败时回退到按 PCI 地址排序（与驱动分配顺序一致）。
+    idx_map = get_gpu_index_map()
+
+    def gpu_sort_key(item):
+        gpu = item[0]
+        idx = idx_map.get(_norm_bdf(gpu["pci"]))
+        return (0, idx) if idx is not None else (1, gpu["pci"])
+
+    matched_sorted = sorted(matched, key=gpu_sort_key)
     print("Detected GPU ↔ IB Topology (by PCI ancestry):\n")
-    # name -> rate，用于汇总行；同一 IB 可能被多 GPU 共享，取首次出现
-    ib_rate = {}
-    for gpu, ib, shared in matched:
+    for gpu, ib, shared in matched_sorted:
+        idx = idx_map.get(_norm_bdf(gpu["pci"]))
+        label = f"GPU{idx}" if idx is not None else f"GPU {gpu['pci']}"
         if ib:
-            ib_rate[ib["ib_name"]] = ib.get("rate", "unknown")
             print(
-                f"GPU {gpu['pci']} ↔ IB {ib['ib_name']} "
+                f"{label}  {gpu['pci']} ↔ IB {ib['ib_name']} "
                 f"[{ib.get('rate', 'unknown')}] (shared bridge: {shared})"
             )
         else:
-            print(f"GPU {gpu['pci']} ↔ (no nearby IB found)")
+            print(f"{label}  {gpu['pci']} ↔ (no nearby IB found)")
     all_ib_names = ",".join(sorted(matched_ibs))
-    # 汇总行：每个 IB 名后附速率，如 "mlx5_0(400 Gb/sec (4X NDR)),mlx5_1(...)"
-    ib_with_rate = ",".join(
-        f"{name}({ib_rate.get(name, 'unknown')})" for name in sorted(matched_ibs)
-    )
     print(f"\nIB devices (GPU-attached): {all_ib_names}")
-    print(f"IB rates: {ib_with_rate}")
     return all_ib_names
 
 
