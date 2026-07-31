@@ -3,8 +3,8 @@
 NCCL Communication Performance Benchmark
 
 Follows nccl-tests conventions:
-  algbw  = data_size / time          (application throughput)
-  busbw  = algbw * correction_factor (hardware link utilization)
+  bandwidth = (data_size / time) * correction_factor
+  (归一化后的单向链路带宽,与 rank 数无关,用于对标 NVLink 单向峰值)
 
 Data size definition per op (matches nccl-tests):
   AllReduce    : send buffer size S  (= recv buffer size)
@@ -15,7 +15,7 @@ Data size definition per op (matches nccl-tests):
   AllToAll     : total send size     = n * per-peer chunk
   AllToAllv    : total send size     = sum of per-peer chunks (unequal)
 
-busbw correction factors:
+correction factors:
   AllReduce    : 2*(n-1)/n
   AllGather    : (n-1)/n
   ReduceScatter: (n-1)/n
@@ -66,8 +66,7 @@ class BenchmarkResult:
     op_name: str
     data_size_bytes: int  # nccl-tests definition of "data size"
     avg_time_ms: float
-    algbw_GBps: float  # data_size / time
-    busbw_GBps: float  # algbw * correction factor
+    bandwidth_GBps: float  # (data_size / time) * correction_factor
     num_warmup: int
     num_iterations: int
 
@@ -76,17 +75,16 @@ class BenchmarkResult:
             f"{self.op_name:15s} | "
             f"{self.data_size_bytes / 1024**2:8.2f} MB | "
             f"{self.avg_time_ms:8.3f} ms | "
-            f"algbw {self.algbw_GBps:7.2f} GB/s | "
-            f"busbw {self.busbw_GBps:7.2f} GB/s"
+            f"Bandwidth {self.bandwidth_GBps:7.2f} GB/s"
         )
 
 
 # ---------------------------------------------------------------------------
-# busbw correction factors (nccl-tests formula)
+# correction factors (nccl-tests formula)
 # ---------------------------------------------------------------------------
 
 
-def busbw_factor(op_name: str, n: int) -> float:
+def correction_factor(op_name: str, n: int) -> float:
     if op_name == "AllReduce":
         return 2.0 * (n - 1) / n
     elif op_name in ("AllGather", "ReduceScatter", "AllToAll", "AllToAllv"):
@@ -158,15 +156,14 @@ class NcclBenchmark:
         num_warmup: int,
         num_iterations: int,
     ) -> BenchmarkResult:
-        # algbw: GB/s using 1e9 bytes per GB (matches nccl-tests)
-        algbw = (data_size_bytes / 1e9) / (avg_time_ms / 1e3)
-        busbw = algbw * busbw_factor(op_name, self.world_size)
+        # bandwidth: GB/s using 1e9 bytes per GB (matches nccl-tests)
+        raw_bw = (data_size_bytes / 1e9) / (avg_time_ms / 1e3)
+        bandwidth = raw_bw * correction_factor(op_name, self.world_size)
         return BenchmarkResult(
             op_name=op_name,
             data_size_bytes=data_size_bytes,
             avg_time_ms=avg_time_ms,
-            algbw_GBps=algbw,
-            busbw_GBps=busbw,
+            bandwidth_GBps=bandwidth,
             num_warmup=num_warmup,
             num_iterations=num_iterations,
         )
@@ -312,20 +309,17 @@ class NcclBenchmark:
         log("=" * 95)
         log("字段说明:")
         log(
-            "  algbw = 数据量 / 耗时            应用视角的吞吐,随 rank 数变化,无法直接对比硬件峰值"
+            "  Bandwidth = (data_size / 耗时) × 校正因子   归一化后的单向链路带宽,与 rank 数无关"
         )
         log(
-            "  busbw = algbw × 校正因子        归一化后的单向链路带宽,与 rank 数无关,用于对标 NVLink 峰值"
-        )
-        log(
-            "  注:busbw 为单向口径。可以直接对比 NVLink 单向速度，例如H200 nv18 单向速度是450GB/s "
+            "  注:单向口径,可以直接对比 NVLink 单向速度，例如H200 nv18 单向速度是450GB/s "
         )
         log("")
         log(
             f"{'Op':15s} | {'DataSize(MB)':>12s} | {'Time(ms)':>10s} | "
-            f"{'algbw(GB/s)':>12s} | {'busbw(GB/s)':>12s}"
+            f"{'Bandwidth(GB/s)':>15s}"
         )
-        log("-" * 70)
+        log("-" * 60)
 
         for count in counts:
             for op_name, bench_fn in op_registry:
@@ -335,9 +329,9 @@ class NcclBenchmark:
                 results[op_name].append(r)
                 log(
                     f"{r.op_name:15s} | {r.data_size_bytes / 1024**2:12.2f} | "
-                    f"{r.avg_time_ms:10.3f} | {r.algbw_GBps:12.2f} | {r.busbw_GBps:12.2f}"
+                    f"{r.avg_time_ms:10.3f} | {r.bandwidth_GBps:15.2f}"
                 )
-            log("-" * 70)
+            log("-" * 60)
 
         log("Benchmark complete.\n")
         return results
@@ -432,8 +426,7 @@ examples:
                     {
                         "data_size_MB": r.data_size_bytes / 1024**2,
                         "avg_time_ms": r.avg_time_ms,
-                        "algbw_GBps": r.algbw_GBps,
-                        "busbw_GBps": r.busbw_GBps,
+                        "bandwidth_GBps": r.bandwidth_GBps,
                     }
                     for r in rs
                 ]
