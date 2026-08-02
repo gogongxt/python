@@ -41,6 +41,7 @@ NVLink 代际判定（nvidia-smi 无直接的 "version" 字段，按架构推断
 """
 
 import argparse
+import csv
 import json
 import re
 import subprocess
@@ -62,60 +63,22 @@ class NVLinkGen:
     per_link_gbs: float  # 标称单链路单向速率 GB/s (双向 ×2)
     max_links: int  # 该代单 GPU 最多链路数
     note: str = ""  # 备注
+    compute_cap: Optional[float] = None  # 对应 GPU compute capability (Rubin 暂无)
 
 
-# 按 compute capability 判定代际
+# 全部代际 (单一数据源), 用于打印参考表 + 推导 _NVLINK_BY_CC。
 # 注意: NVLink 代际号比 GPU 架构"晚一代" —— V100=2.0, A100=3.0, H200=4.0, B200=5.0
-_NVLINK_BY_CC: Dict[float, NVLinkGen] = {
-    6.0: NVLinkGen(
-        "NVLink 1.0", 2016, "Pascal (P100)", "NRZ", "8 (Sub-link)", 20.0, 4, "首次引入"
-    ),
-    7.0: NVLinkGen(
-        "NVLink 2.0",
-        2017,
-        "Volta (V100)",
-        "NRZ",
-        "8 (Sub-link)",
-        25.0,
-        6,
-        "引入 NVSwitch 1.0",
-    ),
-    8.0: NVLinkGen(
-        "NVLink 3.0",
-        2020,
-        "Ampere (A100)",
-        "NRZ",
-        "4 (Sub-link)",
-        25.0,
-        12,
-        "信号对减半, 链路数翻倍",
-    ),
-    9.0: NVLinkGen(
-        "NVLink 4.0",
-        2022,
-        "Hopper (H200)",
-        "PAM-4",
-        "2 (Diff-pair)",
-        25.0,
-        18,
-        "引入 SHARP",
-    ),
-    10.0: NVLinkGen(
-        "NVLink 5.0",
-        2024,
-        "Blackwell (B200)",
-        "PAM-4",
-        "2 (Diff-pair)",
-        50.0,
-        18,
-        "支持 NVL72 机架级扩展",
-    ),
-}
-
-# 全部代际 (含 GH200/Rubin), 用于开头打印参考表
 _ALL_NVLINK_GENS: List[NVLinkGen] = [
     NVLinkGen(
-        "NVLink 1.0", 2016, "Pascal (P100)", "NRZ", "8 (Sub-link)", 20.0, 4, "首次引入"
+        "NVLink 1.0",
+        2016,
+        "Pascal (P100)",
+        "NRZ",
+        "8 (Sub-link)",
+        20.0,
+        4,
+        "首次引入",
+        compute_cap=6.0,
     ),
     NVLinkGen(
         "NVLink 2.0",
@@ -126,6 +89,7 @@ _ALL_NVLINK_GENS: List[NVLinkGen] = [
         25.0,
         6,
         "引入 NVSwitch 1.0",
+        compute_cap=7.0,
     ),
     NVLinkGen(
         "NVLink 3.0",
@@ -136,6 +100,7 @@ _ALL_NVLINK_GENS: List[NVLinkGen] = [
         25.0,
         12,
         "信号对减半, 链路数翻倍",
+        compute_cap=8.0,
     ),
     NVLinkGen(
         "NVLink 4.0",
@@ -145,7 +110,8 @@ _ALL_NVLINK_GENS: List[NVLinkGen] = [
         "2 (Diff-pair)",
         25.0,
         18,
-        "引入 SHARP; H200 均 900 GB/s",
+        "引入 SHARP; 满配 18 链路双向 900 GB/s",
+        compute_cap=9.0,
     ),
     NVLinkGen(
         "NVLink 5.0",
@@ -156,6 +122,7 @@ _ALL_NVLINK_GENS: List[NVLinkGen] = [
         50.0,
         18,
         "支持 NVL72 机架级扩展",
+        compute_cap=10.0,
     ),
     NVLinkGen(
         "NVLink 6.0",
@@ -166,8 +133,15 @@ _ALL_NVLINK_GENS: List[NVLinkGen] = [
         0.0,
         0,
         "NVLink Switch 6, RAS 增强; 3.6 TB/s",
+        compute_cap=None,
     ),
 ]
+
+# 按 compute capability 判定代际 —— 由 _ALL_NVLINK_GENS 推导, 避免两份表漂移。
+# compute_cap 为 None 的代际 (如 Rubin) 不进表。
+_NVLINK_BY_CC: Dict[float, NVLinkGen] = {
+    g.compute_cap: g for g in _ALL_NVLINK_GENS if g.compute_cap is not None
+}
 
 
 def _fmt_bw(gbs: float) -> str:
@@ -232,7 +206,12 @@ def infer_nvlink_gen(compute_cap: float) -> NVLinkGen:
 
 
 def _run(cmd: List[str]) -> str:
-    """运行命令并返回 stdout，失败返回空串。"""
+    """运行命令并返回 stdout。
+
+    - nvidia-smi 不存在 (FileNotFoundError): 直接抛错 —— 与"有驱动但无 NVLink"区别开,
+      否则下游会把"没装驱动"静默当成"没有 NVLink 设备"。
+    - 命令非零退出 / 超时: 返回空串, 由调用方按"该子查询无数据"处理。
+    """
     try:
         r = subprocess.run(
             cmd,
@@ -240,18 +219,41 @@ def _run(cmd: List[str]) -> str:
             text=True,
             timeout=30,
         )
-        return r.stdout if r.returncode == 0 else ""
+    except FileNotFoundError:
+        raise RuntimeError(
+            f"nvidia-smi 未找到 (命令: {' '.join(cmd)}); 请确认驱动已安装且在 PATH 中"
+        )
     except Exception:
         return ""
+    return r.stdout if r.returncode == 0 else ""
 
 
-def _gpu_count() -> int:
+def _gpu_indices() -> List[int]:
+    """返回 nvidia-smi 报告的 GPU index 列表。
+
+    不假设 index 连续或从 0 起 —— 异构卡、CUDA_VISIBLE_DEVICES 过滤后 index 可能不连续,
+    因此直接遍历解析出的 index, 而非 range(count)。
+    """
     out = _run(["nvidia-smi", "--query-gpu=index", "--format=csv,noheader"])
-    return len([l for l in out.splitlines() if l.strip()]) if out else 0
+    if not out:
+        return []
+    idxs = []
+    for line in out.splitlines():
+        line = line.strip()
+        if line:
+            try:
+                idxs.append(int(line))
+            except ValueError:
+                continue
+    return idxs
 
 
-def _query_gpu(fields: List[str]) -> List[str]:
-    """返回每张 GPU 指定字段的值列表（按 index 顺序）。"""
+def _query_gpu_rows(fields: List[str]) -> List[str]:
+    """返回每张 GPU 一行原始 CSV (nounits, 不 strip 内部), 按 nvidia-smi 输出顺序。
+
+    返回原始行而非拆分, 由调用方用 csv 模块解析 —— 这样含逗号的 GPU 名称
+    (如 "NVIDIA Tesla V100-SXM2-32GB, rev2" 之类) 才不会被错误切分。
+    """
     out = _run(
         [
             "nvidia-smi",
@@ -259,7 +261,7 @@ def _query_gpu(fields: List[str]) -> List[str]:
             "--format=csv,noheader,nounits",
         ]
     )
-    return [l.strip() for l in out.splitlines() if l.strip()]
+    return [l for l in out.splitlines() if l.strip()]
 
 
 def _parse_link_status(text: str) -> List[Tuple[int, str]]:
@@ -276,7 +278,10 @@ def _parse_link_status(text: str) -> List[Tuple[int, str]]:
 
 
 # PCI bus ID: 可选 domain(4+ hex) + bus:dev.func，整体不含空格
-_PCI_RE = r"(?:[0-9a-fA-F]{4,}:)?[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F]"
+# bus:dev.func 抽成共享片段，归一化与解析共用，避免两者口径漂移导致
+# 对端 GPU 被误判为 NVSwitch。
+_BUS_FUNC_RE = r"[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F]"
+_PCI_RE = rf"(?:[0-9a-fA-F]{{4,}}:)?{_BUS_FUNC_RE}"
 
 
 def _parse_remote_peer(text: str) -> Dict[int, str]:
@@ -348,20 +353,24 @@ class GPUInfo:
 
     @property
     def per_link_gbs(self) -> float:
-        """实际测得的活动单链路速率（取首条活动链路, nvidia-smi 报告值）。无活动链路返回 0。"""
-        for l in self.active_links:
-            return l.rate_gbs
-        return 0.0
+        """展示用单链路速率: 取活动链路中的最大值 (nvidia-smi 报告值, 单向)。
+
+        仅用于展示, 不参与聚合计算 —— 不同链路可能异速 (故障降速), 取 max 给出
+        "标称/上限"的直观值。无活动链路返回 0。
+        """
+        if not self.active_links:
+            return 0.0
+        return max(l.rate_gbs for l in self.active_links)
 
     @property
     def aggregate_gbs(self) -> float:
-        """单向聚合带宽 = 活动链路数 × 单链路速率（GB/s）。
+        """单向聚合带宽 = Σ 每条活动链路速率（GB/s）。
 
-        单链路速率取 nvidia-smi 报告的原始值（如 A800 25、H200 26.562 GB/s, 单向）。
-        官方标称带宽通常指双向：单向 × 2（见 bidirectional_gbs）。
+        逐链路求和, 不假设所有链路同速 —— 部分链路降速时仍准确。
+        nvidia-smi 报告的速率 (如 A800 25、H200 26.562 GB/s) 为单向。
+        官方标称带宽通常指双向: 单向 × 2 (见 bidirectional_gbs)。
         """
-        per = self.per_link_gbs or self.nvlink_gen.per_link_gbs
-        return per * self.active_link_count
+        return sum(l.rate_gbs for l in self.active_links)
 
     @property
     def bidirectional_gbs(self) -> float:
@@ -377,14 +386,15 @@ class GPUInfo:
             "nvlink_gen": self.nvlink_gen.name,
             "total_links": self.total_links,
             "active_links": self.active_link_count,
-            "per_link_gbps": round(self.per_link_gbs, 3),
-            "aggregate_gbps": round(self.aggregate_gbs, 3),
-            "bidirectional_gbps": round(self.bidirectional_gbs, 3),
+            # 单位为 GB/s (GigaBytes), 不是 Gbits —— 字段名用 _gbs 避免歧义
+            "per_link_gbs": round(self.per_link_gbs, 3),
+            "aggregate_gbs": round(self.aggregate_gbs, 3),
+            "bidirectional_gbs": round(self.bidirectional_gbs, 3),
             "links": [
                 {
                     "link": l.link_id,
                     "state": l.state,
-                    "rate_gbps": l.rate_gbs,
+                    "rate_gbs": l.rate_gbs,
                     "peer_pci": l.peer_pci,
                     "peer_link": l.peer_link,
                 }
@@ -398,36 +408,50 @@ def _norm_pci(p: str) -> str:
 
     '00000000:88:00.0' -> '88:00.0'
     '0000:4A:00.0'    -> '4a:00.0'
+
+    捕获 bus:dev.func 用与解析完全相同的片段 (_BUS_FUNC_RE)，保证归一化口径
+    与 _parse_remote_peer / _parse_remote_link_info 一致，不会因正则漂移而查表失败。
     """
     p = p.lower().strip()
     # 形如 dddd:dd:dd.d 去掉首段
-    m = re.match(r"^(?:[0-9a-f]{4,}:)?([0-9a-f]{2}:[0-9a-f]{2}\.[0-9a-f])$", p)
+    m = re.match(rf"^(?:[0-9a-f]{{4,}}:)?({_BUS_FUNC_RE})$", p)
     return m.group(1) if m else p
 
 
 def detect() -> List[GPUInfo]:
     gpus: List[GPUInfo] = []
 
-    n = _gpu_count()
-    if n == 0:
+    idxs = _gpu_indices()
+    if not idxs:
         return gpus
 
-    # 取 GPU 基本属性
-    names = _query_gpu(["name"])
-    caps = _query_gpu(["compute_cap"])
-    pcis = _query_gpu(["pci.bus_id"])
+    # 一次性取 GPU 基本属性 (index/name/cc/pci), 避免多次 query 间状态漂移。
+    # 用 csv 解析以正确处理含逗号的 GPU 名称。
+    raw_rows = _query_gpu_rows(["index", "name", "compute_cap", "pci.bus_id"])
+    if len(raw_rows) != len(idxs):
+        raise RuntimeError(
+            f"GPU 数量不一致: index 查询 {len(idxs)} 张, 属性查询 {len(raw_rows)} 行。"
+            "可能是 query 期间 GPU 状态变化 (ECC 重置/MIG 重配) 或部分 query 失败。"
+        )
 
-    for i in range(n):
-        name = names[i] if i < len(names) else ""
-        cc = float(caps[i]) if i < len(caps) and caps[i] else 0.0
-        pci = pcis[i] if i < len(pcis) else ""
+    for i, idx in enumerate(idxs):
+        fields = next(csv.reader([raw_rows[i]]))
+        if len(fields) != 4:
+            raise RuntimeError(
+                f"GPU{idx} 属性行字段数异常 (期望 4, 实得 {len(fields)}): {raw_rows[i]!r}"
+            )
+        qidx_s, name, cc_str, pci = (f.strip() for f in fields)
+        try:
+            cc = float(cc_str) if cc_str else 0.0
+        except ValueError:
+            raise RuntimeError(f"GPU{idx} compute_cap 解析失败: {cc_str!r}")
 
         nvgen = infer_nvlink_gen(cc)
 
-        status = _run(["nvidia-smi", "nvlink", "-s", "-i", str(i)])
-        peer = _parse_remote_peer(_run(["nvidia-smi", "nvlink", "-p", "-i", str(i)]))
+        status = _run(["nvidia-smi", "nvlink", "-s", "-i", str(idx)])
+        peer = _parse_remote_peer(_run(["nvidia-smi", "nvlink", "-p", "-i", str(idx)]))
         rlink = _parse_remote_link_info(
-            _run(["nvidia-smi", "nvlink", "-R", "-i", str(i)])
+            _run(["nvidia-smi", "nvlink", "-R", "-i", str(idx)])
         )
 
         links: List[LinkInfo] = []
@@ -443,7 +467,7 @@ def detect() -> List[GPUInfo]:
             rl_id = rl[1] if rl else -1
             links.append(LinkInfo(lid, state, rate, pci_p, rl_id))
 
-        gpus.append(GPUInfo(i, name, pci, cc, nvgen, links))
+        gpus.append(GPUInfo(idx, name, pci, cc, nvgen, links))
 
     # 二次扫描：把对端 PCI 地址解析为 GPU index（同机内 peer）
     _resolve_peers(gpus)
@@ -526,7 +550,7 @@ def print_detail(gpus: List[GPUInfo]):
 def print_simple(gpus: List[GPUInfo]):
     """摘要：每张 GPU 一行 代际/链路数/聚合带宽。"""
     if not gpus:
-        print("")
+        print("No GPU / NVLink devices found.")
         return
     for g in gpus:
         print(
