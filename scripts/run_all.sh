@@ -9,6 +9,7 @@ models=(
   "/nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-V3.2"
   "/nfs/ofs-llm-ssd/models/opensource/DeepSeek-V4-Flash"
   "/nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-V4-Pro"
+  "/nfs/ofs-luban-data/model/deepseek-ai/DeepSeek-V4-Flash-0731"
   "/nfs/ofs-llab-cold/model/deepseek-ai/DeepSeek-OCR"
 
   "/nfs/ofs-llm-ssd/models/opensource/GLM-4.5-FP8"
