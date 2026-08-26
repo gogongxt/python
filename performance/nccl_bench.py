@@ -112,7 +112,7 @@ class NcclBenchmark:
         if self._initialized:
             return
         if "RANK" not in os.environ or "WORLD_SIZE" not in os.environ:
-            raise RuntimeError("Run with torchrun: torchrun --nproc_per_node=N nccl.py")
+            raise RuntimeError("Run with torchrun: torchrun --nproc_per_node=N (this-file)")
         self.rank = int(os.environ["RANK"])
         self.world_size = int(os.environ["WORLD_SIZE"])
         local_rank = int(os.environ.get("LOCAL_RANK", 0))
