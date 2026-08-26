@@ -11,7 +11,8 @@ from the device type, or forced with --backend.
 Metric conventions follow nccl-tests (the measurement standard, independent of
 which backend runs underneath):
   bandwidth = (data_size / time) * correction_factor
-  (归一化后的单向链路带宽,与 rank 数无关,用于对标互连单向峰值)
+  (normalized one-way link bandwidth, independent of rank count, comparable
+  to the one-way peak of the interconnect, e.g. NVLink/HCCS)
 
 Data size definition per op (matches nccl-tests):
   AllReduce    : send buffer size S  (= recv buffer size)
@@ -357,12 +358,15 @@ class CommBenchmark:
             f"dtype={dtype}  |  warmup={num_warmup}  iters={num_iters}"
         )
         log("=" * 95)
-        log("字段说明:")
+        log("Notes:")
         log(
-            "  Bandwidth = (data_size / 耗时) × 校正因子   归一化后的单向链路带宽,与 rank 数无关"
+            "  Bandwidth = (data_size / time) * correction factor -- normalized one-way link"
         )
         log(
-            "  注:单向口径,可以直接对比互连单向速度,例如 H200 NVLink18 单向速度是 450GB/s"
+            "  bandwidth, independent of rank count; directly comparable to one-way link"
+        )
+        log(
+            "  speed, e.g. H200 NVLink18 one-way = 450 GB/s"
         )
         log("")
         log(
