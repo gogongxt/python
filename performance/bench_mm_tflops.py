@@ -31,9 +31,9 @@ BF16/FP16 like a mid square (~4096^3) while FP8 likes a "tall" shape on this car
 TFLOPS = 2*M*N*K / time  (dense, no sparsity).
 
 Usage:
-    CUDA_VISIBLE_DEVICES=0 python mm_tflops.py
-    CUDA_VISIBLE_DEVICES=0 python mm_tflops.py --dtype bf16              # only the bf16 test
-    CUDA_VISIBLE_DEVICES=0 python mm_tflops.py --dtype fp16 --iters 20   # only the fp16 test
+    CUDA_VISIBLE_DEVICES=0 python bench_mm_tflops.py
+    CUDA_VISIBLE_DEVICES=0 python bench_mm_tflops.py --dtype bf16              # only the bf16 test
+    CUDA_VISIBLE_DEVICES=0 python bench_mm_tflops.py --dtype fp16 --iters 20   # only the fp16 test
 """
 
 import argparse

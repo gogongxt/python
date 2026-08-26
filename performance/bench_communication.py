@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """
-NCCL Communication Performance Benchmark
+torch.distributed Communication Performance Benchmark
 
-Follows nccl-tests conventions:
+Backend-agnostic: this benchmarks the torch.distributed collective interfaces
+(all_reduce / all_gather / reduce_scatter / broadcast / reduce / all_to_all).
+The actual communication backend is whatever torch.distributed uses on this
+machine — nccl on NVIDIA CUDA, hccl on Ascend NPU, gloo on CPU — auto-detected
+from the device type, or forced with --backend.
+
+Metric conventions follow nccl-tests (the measurement standard, independent of
+which backend runs underneath):
   bandwidth = (data_size / time) * correction_factor
-  (归一化后的单向链路带宽,与 rank 数无关,用于对标 NVLink 单向峰值)
+  (归一化后的单向链路带宽,与 rank 数无关,用于对标互连单向峰值)
 
 Data size definition per op (matches nccl-tests):
   AllReduce    : send buffer size S  (= recv buffer size)
@@ -15,7 +22,7 @@ Data size definition per op (matches nccl-tests):
   AllToAll     : total send size     = n * per-peer chunk
   AllToAllv    : total send size     = sum of per-peer chunks (unequal)
 
-correction factors:
+correction factors (nccl-tests formula):
   AllReduce    : 2*(n-1)/n
   AllGather    : (n-1)/n
   ReduceScatter: (n-1)/n
@@ -25,40 +32,57 @@ correction factors:
   AllToAllv    : (n-1)/n
 
 Usage:
-  Run with torchrun, one process per GPU. nproc_per_node = number of GPUs.
+  Run with torchrun, one process per device. nproc_per_node = number of devices.
 
-    # All ops, single 512 MB size, 8 GPUs (default dtype=bfloat16)
-    torchrun --nproc_per_node=8 performance/nccl_bench.py --size-mb 512
-
-    # Use the env that has PyTorch + NCCL installed
-    torchrun \\
-        --nproc_per_node=8 performance/nccl_bench.py --size-mb 512
+    # All ops, single 512 MB size, 8 devices (default dtype=bfloat16)
+    torchrun --nproc_per_node=8 performance/bench_communication.py --size-mb 512
 
     # Only AllReduce + AllGather, 1 GB, more iterations
-    torchrun --nproc_per_node=8 performance/nccl_bench.py \\
+    torchrun --nproc_per_node=8 performance/bench_communication.py \\
         --size-mb 1024 --ops allreduce allgather --iterations 200
 
-    # Multi-node: set --nnodes, --nproc_per_node, and a shared --rdzv endpoint
-    # (rank 0 host):  torchrun --nnodes=2 --nproc_per_node=8 --rdzv_backend=c10d \
-    #                 --rdzv_endpoint=<rank0_ip>:29500 performance/nccl_bench.py
-    # (rank 1 host):  torchrun --nnodes=2 --nproc_per_node=8 --rdzv_backend=c10d \
-    #                 --rdzv_endpoint=<rank0_ip>:29500 performance/nccl_bench.py
+    # Force a specific torch.distributed backend (default: auto — nccl/hccl/gloo
+    # by detected device type)
+    torchrun --nproc_per_node=8 performance/bench_communication.py --backend nccl
 
-  Results (one entry per op) are written to --output as JSON. nccl-tests
-  environment variables (NCCL_DEBUG, NCCL_NET, etc.) work as usual.
+    # Multi-node: set --nnodes, --nproc_per_node, and a shared --rdzv endpoint
+    # (rank 0 host):  torchrun --nnodes=2 --nproc_per_node=8 --rdzv_backend=c10d \\
+    #                 --rdzv_endpoint=<rank0_ip>:29500 performance/bench_communication.py
+    # (rank 1 host):  torchrun --nnodes=2 --nproc_per_node=8 --rdzv_backend=c10d \\
+    #                 --rdzv_endpoint=<rank0_ip>:29500 performance/bench_communication.py
+
+  Results print to the terminal (rank 0). Backend-specific environment
+  variables work as usual (NCCL_* for nccl, HCCL_* for hccl).
 
   --ops with "all" runs every op; otherwise pass a subset (allreduce,
   allgather, reducescatter, broadcast, reduce, alltoall, alltoallv).
 """
 
 import argparse
-import json
 import os
+import time
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Tuple
 
 import torch
 import torch.distributed as dist
+
+# device type -> default torch.distributed backend on that device
+DEFAULT_BACKEND = {"cuda": "nccl", "npu": "hccl", "cpu": "gloo"}
+
+
+def detect_device_type() -> str:
+    """cuda > npu > cpu, so the script runs unchanged on NVIDIA or Ascend."""
+    if torch.cuda.is_available():
+        return "cuda"
+    npu = getattr(torch, "npu", None)
+    if npu is not None:
+        try:
+            if npu.is_available():
+                return "npu"
+        except Exception:
+            pass
+    return "cpu"
 
 
 @dataclass
@@ -99,29 +123,44 @@ def correction_factor(op_name: str, n: int) -> float:
 # ---------------------------------------------------------------------------
 
 
-class NcclBenchmark:
+class CommBenchmark:
 
-    def __init__(self, backend: str = "nccl"):
-        self.backend = backend
+    def __init__(self, backend: str = None):
+        self.backend = backend  # None -> auto from detected device type
+        self.device_type = detect_device_type()
         self.rank = -1
         self.world_size = -1
         self.device = None
         self._initialized = False
 
+    @property
+    def accel(self):
+        """torch.cuda / torch.npu handle (set_device/Event/synchronize); None on cpu."""
+        return getattr(torch, self.device_type, None) if self.device_type != "cpu" else None
+
     def init_distributed(self):
         if self._initialized:
             return
         if "RANK" not in os.environ or "WORLD_SIZE" not in os.environ:
-            raise RuntimeError("Run with torchrun: torchrun --nproc_per_node=N (this-file)")
+            raise RuntimeError(
+                "Run with torchrun: torchrun --nproc_per_node=N "
+                "performance/bench_communication.py"
+            )
         self.rank = int(os.environ["RANK"])
         self.world_size = int(os.environ["WORLD_SIZE"])
         local_rank = int(os.environ.get("LOCAL_RANK", 0))
-        self.device = torch.device(f"cuda:{local_rank}")
-        torch.cuda.set_device(self.device)
+        if self.device_type == "cpu":
+            self.device = torch.device("cpu")
+        else:
+            self.device = torch.device(f"{self.device_type}:{local_rank}")
+            self.accel.set_device(self.device)
+        if self.backend is None:
+            self.backend = DEFAULT_BACKEND[self.device_type]
         if not dist.is_initialized():
             dist.init_process_group(backend=self.backend)
         self._initialized = True
-        print(f"[Rank {self.rank}] device={self.device}, world_size={self.world_size}")
+        print(f"[Rank {self.rank}] device={self.device}, backend={self.backend}, "
+              f"world_size={self.world_size}")
 
     def cleanup(self):
         if dist.is_initialized():
@@ -130,23 +169,33 @@ class NcclBenchmark:
     def _time_op(
         self, op_func: Callable, num_warmup: int, num_iterations: int
     ) -> float:
-        """Return average time in ms using CUDA Events, with cross-rank synchronization."""
+        """Return average time in ms using device Events (wall clock on cpu),
+        with cross-rank synchronization."""
         for _ in range(num_warmup):
             op_func()
         # Sync all ranks after warmup so timing starts cleanly
         dist.barrier()
-        torch.cuda.synchronize()
 
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
-        start.record()
+        if self.accel is not None:
+            self.accel.synchronize()
+            start = self.accel.Event(enable_timing=True)
+            end = self.accel.Event(enable_timing=True)
+            start.record()
+            for _ in range(num_iterations):
+                op_func()
+            end.record()
+            self.accel.synchronize()
+            # Barrier ensures all ranks finish before rank 0 reads the result
+            dist.barrier()
+            return start.elapsed_time(end) / num_iterations
+
+        # cpu/gloo fallback: no device events, use wall clock across ranks
+        dist.barrier()
+        t0 = time.perf_counter()
         for _ in range(num_iterations):
             op_func()
-        end.record()
-        torch.cuda.synchronize()
-        # Barrier ensures all ranks finish before rank 0 reads the result
         dist.barrier()
-        return start.elapsed_time(end) / num_iterations
+        return (time.perf_counter() - t0) * 1e3 / num_iterations
 
     def _make_result(
         self,
@@ -303,8 +352,9 @@ class NcclBenchmark:
 
         log("\n" + "=" * 95)
         log(
-            f"  NCCL Benchmark  |  world_size={self.world_size}  |  dtype={dtype}  |  "
-            f"warmup={num_warmup}  iters={num_iters}"
+            f"  Communication Benchmark  |  backend={self.backend}  |  "
+            f"device={self.device_type}  |  world_size={self.world_size}  |  "
+            f"dtype={dtype}  |  warmup={num_warmup}  iters={num_iters}"
         )
         log("=" * 95)
         log("字段说明:")
@@ -312,7 +362,7 @@ class NcclBenchmark:
             "  Bandwidth = (data_size / 耗时) × 校正因子   归一化后的单向链路带宽,与 rank 数无关"
         )
         log(
-            "  注:单向口径,可以直接对比 NVLink 单向速度，例如H200 nv18 单向速度是450GB/s "
+            "  注:单向口径,可以直接对比互连单向速度,例如 H200 NVLink18 单向速度是 450GB/s"
         )
         log("")
         log(
@@ -344,19 +394,20 @@ class NcclBenchmark:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="NCCL benchmark (nccl-tests conventions)",
+        description="torch.distributed communication benchmark (nccl-tests metric "
+                    "conventions; backend auto-detected: nccl/hccl/gloo)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
 examples:
-  # All ops, 512 MB, 8 GPUs (default dtype=bfloat16)
-  torchrun --nproc_per_node=8 performance/nccl_bench.py --size-mb 512
-
-  # Use the env with PyTorch + NCCL
-  torchrun --nproc_per_node=8 performance/nccl_bench.py --size-mb 512
+  # All ops, 512 MB, 8 devices (default dtype=bfloat16)
+  torchrun --nproc_per_node=8 performance/bench_communication.py --size-mb 512
 
   # Only AllReduce + AllGather, 1 GB, more iterations
-  torchrun --nproc_per_node=8 performance/nccl_bench.py \\
+  torchrun --nproc_per_node=8 performance/bench_communication.py \\
       --size-mb 1024 --ops allreduce allgather --iterations 200
+
+  # Force a backend (default: auto — nccl on cuda, hccl on npu, gloo on cpu)
+  torchrun --nproc_per_node=8 performance/bench_communication.py --backend nccl
 """,
     )
     parser.add_argument(
@@ -373,6 +424,12 @@ examples:
         choices=["float16", "bfloat16", "float32", "float64"],
     )
     parser.add_argument(
+        "--backend",
+        default=None,
+        help="torch.distributed backend (nccl/hccl/gloo/...). Default: auto by "
+             "device type — nccl on cuda, hccl on npu, gloo on cpu.",
+    )
+    parser.add_argument(
         "--ops",
         nargs="+",
         default=["all"],
@@ -387,7 +444,6 @@ examples:
             "alltoallv",
         ],
     )
-    parser.add_argument("--output", default="nccl_benchmark_results.json")
     args = parser.parse_args()
 
     dtype = {
@@ -400,39 +456,28 @@ examples:
 
     counts = [int(args.size_mb * 1024**2 / itemsize)]
 
-    bench = NcclBenchmark()
+    bench = CommBenchmark(backend=args.backend)
     bench.init_distributed()
 
     try:
         if bench.rank == 0:
-            gpu = torch.cuda.get_device_name(0)
+            try:
+                dev_name = (bench.accel.get_device_name(bench.device)
+                            if bench.accel is not None else "CPU")
+            except Exception:
+                dev_name = bench.device_type
             # Display the per-rank input size (AllGather/ReduceScatter data_size will be n× larger)
             sizes_mb = [f"{c * itemsize / 1024**2:.2f}MB" for c in counts]
-            print(f"\nGPU: {gpu} x {bench.world_size}")
+            print(f"\nDevice: {dev_name} x {bench.world_size}  (backend={bench.backend})")
             print(f"Per-rank input sizes: {sizes_mb}")
 
-        results = bench.run(
+        bench.run(
             counts=counts,
             dtype=dtype,
             num_warmup=args.warmup,
             num_iters=args.iterations,
             ops=args.ops,
         )
-
-        if bench.rank == 0:
-            json_out = {}
-            for op, rs in results.items():
-                json_out[op] = [
-                    {
-                        "data_size_MB": r.data_size_bytes / 1024**2,
-                        "avg_time_ms": r.avg_time_ms,
-                        "bandwidth_GBps": r.bandwidth_GBps,
-                    }
-                    for r in rs
-                ]
-            with open(args.output, "w") as f:
-                json.dump(json_out, f, indent=2)
-            print(f"Results saved to {args.output}")
     finally:
         bench.cleanup()
 
